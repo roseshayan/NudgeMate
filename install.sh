@@ -115,37 +115,105 @@ while true; do
     fi
 done
 
-# 6. Validation: Dahl AI API Key
-while true; do
-    echo -e "${CYAN}۳. لطفاً کلید API سرویس Dahl Inference را وارد کنید:${NC}"
-    echo -e "${YELLOW}(از سایت https://inference.dahl.global/account کلید را کپی و توکن به آن تخصیص دهید)${NC}"
-    read -r -p "Dahl API Key: " DAHL_KEY
-    DAHL_KEY=$(echo "$DAHL_KEY" | xargs)
+# 6. Dahl AI Configuration: Automatic Email Registration or Manual Key
+echo -e "${CYAN}۳. نحوه تنظیم هوش مصنوعی Dahl:${NC}"
+echo -e "   ${BOLD}[1]${NC} ${GREEN}ساخت خودکار اکانت Dahl با ایمیل و تخصیص ۱۰۰ میلیون توکن هدیه (پیشنهادی 🌟)${NC}"
+echo -e "   ${BOLD}[2]${NC} وارد کردن کلید API به صورت دستی (اگر از قبل اکانت دارید)"
 
-    if [ -z "$DAHL_KEY" ]; then
-        echo -e "${RED}✖ خطا: کلید API نمی‌تواند خالی باشد!${NC}\n"
-        continue
+while true; do
+    read -r -p "گزینه مورد نظر را انتخاب کنید [1/2] (پیش‌فرض: 1): " DAHL_CHOICE
+    DAHL_CHOICE=${DAHL_CHOICE:-1}
+
+    if [ "$DAHL_CHOICE" == "1" ]; then
+        # Automatic Signup via Email
+        while true; do
+            echo -e "\n${CYAN}لطفاً ایمیل خود را برای ساخت اکانت وارد کنید:${NC}"
+            echo -e "${YELLOW}(برای ساخت شناسه و ثبت در سیستم هوش مصنوعی استفاده می‌شود)${NC}"
+            read -r -p "Email: " USER_EMAIL
+            USER_EMAIL=$(echo "$USER_EMAIL" | xargs)
+
+            if [[ "$USER_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+                echo -e "${BLUE}در حال ساخت خودکار اکانت و اختصاص ۱۰۰ میلیون توکن در Dahl Global...${NC}"
+                
+                # Execute Python auth helper
+                AUTH_RESULT=$(python3 "$APP_DIR/nudgemate/utils/dahl_auth.py" "$USER_EMAIL" 2>/dev/null || true)
+                AUTH_SUCCESS=$(echo "$AUTH_RESULT" | jq -r '.success // false' 2>/dev/null || echo "false")
+
+                if [ "$AUTH_SUCCESS" == "true" ]; then
+                    DAHL_KEY=$(echo "$AUTH_RESULT" | jq -r '.api_key')
+                    DAHL_USER=$(echo "$AUTH_RESULT" | jq -r '.username')
+                    DAHL_FP=$(echo "$AUTH_RESULT" | jq -r '.fingerprint')
+                    DAHL_TOKENS=$(echo "$AUTH_RESULT" | jq -r '.allocated_tokens // 100000000')
+
+                    echo -e "\n${GREEN}${BOLD}✔ اکانت هوش مصنوعی شما با موفقیت ساخته شد! 🎉${NC}"
+                    echo -e "👤 نام کاربری: ${BOLD}${DAHL_USER}${NC}"
+                    echo -e "🔑 کلید API: ${BOLD}${DAHL_KEY:0:15}...${NC}"
+                    echo -e "🎁 توکن‌های اختصاص‌یافته: ${BOLD}${DAHL_TOKENS}${NC}"
+                    echo -e "🔐 اثر انگشت (کلمه عبور جهت ورود به سایت): ${YELLOW}${BOLD}${DAHL_FP}${NC}"
+                    
+                    # Save credentials securely to a hidden file
+                    cat <<CRED_EOF > "$APP_DIR/.dahl_credentials"
+EMAIL=${USER_EMAIL}
+USERNAME=${DAHL_USER}
+FINGERPRINT=${DAHL_FP}
+API_KEY=${DAHL_KEY}
+ALLOCATED_TOKENS=${DAHL_TOKENS}
+CRED_EOF
+                    chmod 600 "$APP_DIR/.dahl_credentials"
+                    echo -e "${CYAN}ℹ️ این مشخصات در فایل ${APP_DIR}/.dahl_credentials ذخیره شد.${NC}\n"
+                    break 2
+                else
+                    AUTH_ERR=$(echo "$AUTH_RESULT" | jq -r '.error // "خطای ناشناخته در ارتباط با سرور Dahl"')
+                    echo -e "${RED}✖ خطا در ساخت خودکار اکانت: ${AUTH_ERR}${NC}"
+                    echo -e "${YELLOW}آیا می‌خواهید با ایمیل دیگری امتحان کنید؟ (y/n): ${NC}"
+                    read -r -p "[y/n]: " RETRY_SIGNUP
+                    if [[ "$RETRY_SIGNUP" =~ ^[Nn] ]]; then
+                        echo -e "${YELLOW}تغییر به حالت وارد کردن دستی کلید API...${NC}\n"
+                        DAHL_CHOICE="2"
+                        break
+                    fi
+                fi
+            else
+                echo -e "${RED}✖ خطا: فرمت ایمیل نامعتبر است! لطفاً ایمیل صحیح وارد کنید.${NC}"
+            fi
+        done
     fi
 
-    echo -e "${BLUE}در حال بررسی اعتبار کلید API در سرویس Dahl...${NC}"
-    DAHL_CHECK=$(curl -s "https://inference.dahl.global/tokens/current" -H "Authorization: Bearer ${DAHL_KEY}")
-    
-    # Check if returns status or error
-    if echo "$DAHL_CHECK" | grep -q "available_tokens"; then
-        AVAIL_TOKENS=$(echo "$DAHL_CHECK" | jq -r '.available_tokens // "موجود"')
-        echo -e "${GREEN}✔ کلید Dahl معتبر است! توکن‌های تخصیص‌یافته: ${AVAIL_TOKENS}${NC}\n"
-        break
-    elif echo "$DAHL_CHECK" | grep -q "402"; then
-        echo -e "${YELLOW}⚠ کلید معتبر است اما موجودی توکن آن 0 است. بعد از نصب می‌توانید در سایت به کلید توکن اختصاص دهید.${NC}\n"
-        break
+    if [ "$DAHL_CHOICE" == "2" ]; then
+        # Manual API Key Input
+        while true; do
+            echo -e "\n${CYAN}لطفاً کلید API سرویس Dahl Inference را وارد کنید:${NC}"
+            echo -e "${YELLOW}(از سایت https://inference.dahl.global/account کلید را کپی کنید)${NC}"
+            read -r -p "Dahl API Key: " DAHL_KEY
+            DAHL_KEY=$(echo "$DAHL_KEY" | xargs)
+
+            if [ -z "$DAHL_KEY" ]; then
+                echo -e "${RED}✖ خطا: کلید API نمی‌تواند خالی باشد!${NC}\n"
+                continue
+            fi
+
+            echo -e "${BLUE}در حال بررسی اعتبار کلید API در سرویس Dahl...${NC}"
+            DAHL_CHECK=$(curl -s -m 10 "https://inference.dahl.global/tokens/current" -H "Authorization: Bearer ${DAHL_KEY}" || true)
+            
+            if echo "$DAHL_CHECK" | grep -q "available_tokens"; then
+                AVAIL_TOKENS=$(echo "$DAHL_CHECK" | jq -r '.available_tokens // "موجود"')
+                echo -e "${GREEN}✔ کلید Dahl معتبر است! توکن‌های تخصیص‌یافته: ${AVAIL_TOKENS}${NC}\n"
+                break 2
+            elif echo "$DAHL_CHECK" | grep -q "402"; then
+                echo -e "${YELLOW}⚠ کلید معتبر است اما موجودی توکن آن 0 است. بعد از نصب می‌توانید در سایت به کلید توکن اختصاص دهید.${NC}\n"
+                break 2
+            else
+                echo -e "${RED}✖ کلید API وارد شده معتبر نیست یا سرور در دسترس نیست!${NC}"
+                echo -e "${YELLOW}آیا می‌خواهید دوباره وارد کنید؟ (y/n): ${NC}"
+                read -r -p "[y/n]: " RETRY_KEY
+                if [[ "$RETRY_KEY" =~ ^[Nn] ]]; then
+                    echo -e "${YELLOW}استفاده از کلید وارد شده ادامه می‌یابد.${NC}\n"
+                    break 2
+                fi
+            fi
+        done
     else
-        echo -e "${RED}✖ کلید API وارد شده معتبر نیست یا منقضی شده است!${NC}"
-        echo -e "${YELLOW}آیا می‌خواهید دوباره وارد کنید؟ (y/n): ${NC}"
-        read -r -p "[y/n]: " RETRY_KEY
-        if [[ "$RETRY_KEY" =~ ^[Nn] ]]; then
-            echo -e "${YELLOW}استفاده از کلید وارد شده ادامه می‌یابد.${NC}\n"
-            break
-        fi
+        echo -e "${RED}✖ لطفاً عدد 1 یا 2 را انتخاب کنید.${NC}"
     fi
 done
 

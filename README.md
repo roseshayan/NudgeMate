@@ -57,7 +57,9 @@ curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh
 نصاب هوشمند NudgeMate دارای **حلقه اعتبارسنجی (Validation Loop)** است و اگر ورودی را اشتباه تایپ کنید، خطا را با رنگ قرمز نمایش داده و دوباره از شما می‌خواهد آن را وارد کنید:
 1. **Telegram Bot Token:** توکن دریافتی از [@BotFather](https://t.me/BotFather) (در لحظه با API تلگرام تست و تایید می‌شود).
 2. **Admin Chat ID:** شناسه عددی تلگرام شما (از [@userinfobot](https://t.me/userinfobot) دریافت کنید).
-3. **Dahl API Key:** کلید دریافتی از پنل [inference.dahl.global](https://inference.dahl.global/account).
+3. **تنظیم هوش مصنوعی Dahl (دو حالت):**
+   - **حالت خودکار (پیشنهادی):** فقط کافیست ایمیل خود را وارد کنید! نصاب به صورت اتوماتیک در [Dahl Global](https://inference.dahl.global) ثبت‌نام می‌کند، کلید اختصاصی می‌گیرد، **۱۰۰ میلیون توکن رایگان** به آن اختصاص می‌دهد و مشخصات ورود (Fingerprint) را ذخیره می‌کند.
+   - **حالت دستی:** اگر از قبل در Dahl اکانت دارید، می‌توانید کلید API خود را مستقیماً وارد کنید.
 4. **منطقه زمانی:** پیش‌فرض `Asia/Tehran` است و می‌توانید با اینتر زدن آن را تایید کنید.
 
 ---
