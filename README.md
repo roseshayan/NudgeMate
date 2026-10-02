@@ -33,14 +33,16 @@ For busy people, forgetful minds, or individuals with ADHD, traditional task man
 - **Persistent Nagging Loop:** If you don't mark a task completed or snooze it, NudgeMate follows up every 15 minutes with interactive inline buttons!
 - **Second Brain Memory:** Tell it *"Remember the safe code is 98765"*. Later ask *"What is my safe code?"* and it instantly recalls it.
 
----
+### 🚀 Quick Interactive Installer (Ubuntu 24.04)
 
-### 🚀 One-Line Interactive Installer (Ubuntu 24.04)
-
-Run this single command with `sudo` on your server:
+Run either of these commands on your server:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh | sudo bash
+# Option 1: Fast One-Liner (Recommended)
+bash <(curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh)
+
+# Option 2: Download & Run
+curl -sSLO https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh && sudo bash install.sh
 ```
 
 #### What makes this installer special?
@@ -108,12 +110,16 @@ nudgemate-update    # Pull latest GitHub release
 
 ---
 
-### 🚀 نصب آسان روی اوبونتو 24 با دستور تک‌خطی
+### 🚀 نصب آسان روی اوبونتو 24
 
-کافیست دستور زیر را با دسترسی `sudo` در ترمینال سرور خود اجرا کنید:
+می‌توانید از هر یک از دو روش زیر در ترمینال سرور استفاده کنید:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh | sudo bash
+# روش اول: اجرای تک‌خطی مستقیم (پیشنهادی)
+bash <(curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh)
+
+# روش دوم: دانلود و اجرا
+curl -sSLO https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh && sudo bash install.sh
 ```
 
 #### ویژگی‌های نصاب هوشمند:

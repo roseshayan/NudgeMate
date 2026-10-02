@@ -7,13 +7,6 @@
 
 set -e
 
-# Redirect stdin from controlling terminal if run via curl | bash
-if [ ! -t 0 ]; then
-    if [ -e /dev/tty ]; then
-        exec < /dev/tty
-    fi
-fi
-
 # ANSI Color Codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
