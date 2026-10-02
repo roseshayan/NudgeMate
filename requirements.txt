@@ -1,0 +1,25 @@
+# Telegram Framework
+aiogram>=3.13.0
+
+# AI & LLM (OpenAI-compatible client for Dahl Global Inference)
+openai>=1.50.0
+
+# Speech to Text (Local fast Whisper for voice notes)
+faster-whisper>=1.0.0
+
+# Scheduling & Timers
+APScheduler>=3.10.4
+
+# Database
+aiosqlite>=0.20.0
+
+# Date, Time & Jalali (Shamsi) Calendar
+jdatetime>=5.1.0
+pytz>=2024.1
+
+# Environment & Settings
+python-dotenv>=1.0.1
+pydantic>=2.8.0
+
+# Networking & System
+aiohttp>=3.9.5

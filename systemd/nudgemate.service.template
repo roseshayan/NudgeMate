@@ -1,0 +1,19 @@
+[Unit]
+Description=NudgeMate AI Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{APP_DIR}}
+ExecStart={{APP_DIR}}/venv/bin/python -m nudgemate.main
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Environment
+EnvironmentFile={{APP_DIR}}/.env
+
+[Install]
+WantedBy=multi-user.target

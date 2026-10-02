@@ -1,0 +1,4 @@
+# Force Linux line endings (LF) for shell scripts so they execute cleanly on Ubuntu
+*.sh text eol=lf
+*.service.template text eol=lf
+*.py text eol=lf
