@@ -6,6 +6,8 @@ openai>=1.50.0
 
 # Speech to Text (Local fast Whisper for voice notes)
 faster-whisper>=1.0.0
+av>=11.0.0,<14.0.0
+numpy>=1.24.0
 
 # Scheduling & Timers
 APScheduler>=3.10.4

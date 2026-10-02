@@ -138,6 +138,13 @@ async def handle_user_intent(message: types.Message, user_text: str, is_voice: b
 @router.message(F.voice)
 async def handle_voice_message(message: types.Message, bot: Bot):
     """Handles Telegram voice messages, transcribes via faster-whisper, and routes to AI."""
+    user = await db.get_or_create_user(
+        user_id=message.from_user.id,
+        first_name=message.from_user.first_name,
+        username=message.from_user.username,
+    )
+    lang = user.language or "fa"
+
     await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.RECORD_VOICE)
 
     temp_filename = f"{uuid.uuid4().hex}.ogg"
@@ -147,18 +154,29 @@ async def handle_voice_message(message: types.Message, bot: Bot):
         file = await bot.get_file(message.voice.file_id)
         await bot.download_file(file.file_path, destination=temp_path)
 
-        # Transcribe audio
-        transcript = await voice_service.transcribe_audio(temp_path)
+        # Transcribe audio using user's language
+        target_lang = lang if lang in ["fa", "en"] else "fa"
+        transcript = await voice_service.transcribe_audio(temp_path, language=target_lang)
 
         if not transcript or len(transcript.strip()) < 2:
-            await message.reply("🎙 متاسفانه نتونستم صدای ویس رو واضح تشخیص بدم. لطفاً کمی نزدیک‌تر و واضح‌تر بگو.")
+            no_speech = (
+                "🎙 متاسفانه نتونستم صدای ویس رو واضح تشخیص بدم. لطفاً کمی نزدیک‌تر و واضح‌تر بگو."
+                if lang == "fa"
+                else "🎙 Couldn't detect any clear speech in the voice note. Please try speaking closer or clearer."
+            )
+            await message.reply(no_speech)
             return
 
         await handle_user_intent(message, transcript, is_voice=True)
 
     except Exception as e:
         logger.error(f"Error handling voice message: {e}", exc_info=True)
-        await message.reply("⚠️ هنگام پردازش ویس خطایی رخ داد. مطمئن شو پکیج ffmpeg روی سرور نصبه.")
+        err_msg = (
+            "⚠️ هنگام پردازش ویس خطایی رخ داد. برای جزئیات دستور `nudgemate logs` را روی سرور بررسی کن."
+            if lang == "fa"
+            else "⚠️ An error occurred while processing the voice note. Please check logs via `nudgemate logs`."
+        )
+        await message.reply(err_msg)
     finally:
         # Cleanup temp file
         if temp_path.exists():

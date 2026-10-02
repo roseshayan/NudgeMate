@@ -32,8 +32,11 @@ echo -e "${GREEN}New Version Downloaded: ${NEW_COMMIT}${NC}"
 
 # 2. Update Python dependencies if needed
 if [ -d "venv" ]; then
-    echo -e "${BLUE}▶ Updating Python dependencies...${NC}"
-    ./venv/bin/pip install -r requirements.txt -q
+    echo -e "${BLUE}▶ Updating Python dependencies & fixing package versions...${NC}"
+    ./venv/bin/pip install -r requirements.txt
+    
+    echo -e "${BLUE}▶ Verifying Whisper speech-to-text AI model cache...${NC}"
+    ./venv/bin/python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')" 2>/dev/null || true
 fi
 
 # 3. Ensure permissions

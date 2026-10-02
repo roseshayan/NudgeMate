@@ -269,6 +269,10 @@ echo -e "${YELLOW}    (Downloading packages and AI libraries, please wait)...${N
 ./venv/bin/pip install -r requirements.txt
 echo -e "${GREEN}✔ Python packages installed successfully.${NC}\n"
 
+echo -e "${CYAN}  → Pre-downloading Whisper AI speech-to-text model (base)...${NC}"
+./venv/bin/python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')" || true
+echo -e "${GREEN}✔ Whisper AI speech model cached successfully.${NC}\n"
+
 # 6. Setup Systemd Service
 echo -e "${CYAN}  → Configuring systemd background service (nudgemate.service)...${NC}"
 CURRENT_USER=$(logname 2>/dev/null || echo "$SUDO_USER")

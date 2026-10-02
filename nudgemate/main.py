@@ -10,6 +10,7 @@ from nudgemate.config import settings
 from nudgemate.database.db import db
 from nudgemate.handlers import commands, messages, callbacks
 from nudgemate.services.scheduler_service import scheduler_service
+from nudgemate.services.voice_service import voice_service
 
 # Logging Configuration
 logging.basicConfig(
@@ -51,6 +52,11 @@ async def main():
 
     # Start Scheduler
     scheduler_service.start(bot)
+
+    # Pre-warm Whisper speech recognition model
+    logger.info("Pre-warming Whisper speech recognition model...")
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, voice_service.preload_model)
 
     # Notify Admin on Startup
     if settings.ADMIN_CHAT_ID:
