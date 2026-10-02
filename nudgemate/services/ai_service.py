@@ -21,13 +21,24 @@ class AIService:
         self.model = settings.DAHL_MODEL
 
     def _clean_json_response(self, content: str) -> str:
-        """Strips markdown code fences and whitespace from LLM output."""
-        cleaned = content.strip()
-        # Remove ```json ... ``` or ``` ... ```
-        if cleaned.startswith("```"):
-            cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
-            cleaned = re.sub(r"\s*```$", "", cleaned)
-        return cleaned.strip()
+        """Extracts JSON object from LLM response safely, handling markdown code blocks, think tags, and preambles."""
+        if not content:
+            return "{}"
+
+        # Remove thinking/reasoning blocks (e.g. <think>...</think>)
+        cleaned = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+
+        # Look for code blocks first (```json { ... } ``` or ``` { ... } ```)
+        code_block = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
+        if code_block:
+            return code_block.group(1).strip()
+
+        # Look for outer {...}
+        json_obj = re.search(r"(\{.*\})", cleaned, re.DOTALL)
+        if json_obj:
+            return json_obj.group(1).strip()
+
+        return cleaned
 
     async def analyze_message(self, user_text: str, lang: str = "fa") -> dict:
         """
@@ -80,6 +91,7 @@ Rules:
 4. Memos/facts to remember without specific time -> intent='note', remind_at=null.
 5. Questions about past notes/tasks -> intent='query'.
 6. Greetings -> intent='chitchat'.
+IMPORTANT: Respond with pure JSON only, without any markdown formatting or explanations.
 """
 
         try:
@@ -93,6 +105,7 @@ Rules:
             )
 
             raw_text = response.choices[0].message.content or ""
+            logger.info(f"AI analysis raw response: {raw_text[:120]}")
             cleaned = self._clean_json_response(raw_text)
 
             data = json.loads(cleaned)
@@ -100,12 +113,27 @@ Rules:
 
         except Exception as e:
             logger.error(f"Error in Dahl AI analysis: {e}", exc_info=True)
-            # Fallback response
-            fallback_reply = "پیامت رو ثبت کردم رفیق!" if lang == "fa" else "Got your message, saved!"
+            # Smart fallback: check if user text mentions obvious relative times (e.g. نیم ساعت دیگه, ۱۰ دقیقه دیگه)
+            from datetime import timedelta
+            remind_at = None
+            if "نیم ساعت" in user_text or "30 دقیقه" in user_text or "۳۰ دقیقه" in user_text:
+                remind_at = (now + timedelta(minutes=30)).strftime("%Y-%m-%dT%H:%M:%S")
+            elif "یک ربع" in user_text or "15 دقیقه" in user_text or "۱۵ دقیقه" in user_text:
+                remind_at = (now + timedelta(minutes=15)).strftime("%Y-%m-%dT%H:%M:%S")
+            elif "یک ساعت" in user_text or "1 ساعت" in user_text or "۱ ساعت" in user_text:
+                remind_at = (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+            elif "10 دقیقه" in user_text or "۱۰ دقیقه" in user_text:
+                remind_at = (now + timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%S")
+
+            fallback_reply = (
+                "یادآوری شما ثبت شد!" if remind_at else "پیامت رو ثبت کردم رفیق!"
+            ) if lang == "fa" else (
+                "Reminder set!" if remind_at else "Saved your note!"
+            )
             return {
-                "intent": "task",
-                "title": user_text[:50],
-                "remind_at": None,
+                "intent": "task" if remind_at else "note",
+                "title": user_text[:60],
+                "remind_at": remind_at,
                 "category": "general",
                 "priority": "medium",
                 "reply_text": fallback_reply,

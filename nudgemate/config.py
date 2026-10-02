@@ -23,7 +23,12 @@ class Settings:
     DAHL_BASE_URL: str = os.getenv("DAHL_BASE_URL", "https://inference.dahl.global/v1").strip()
     DAHL_MODEL: str = os.getenv("DAHL_MODEL", "MiniMaxAI/MiniMax-M2.7").strip()
 
-    # Whisper Settings
+    # STT Multi-Engine Settings ('auto', 'google', 'groq', 'openai', 'local')
+    STT_ENGINE: str = os.getenv("STT_ENGINE", "auto").strip().lower()
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "").strip()
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "").strip()
+
+    # Local Whisper Settings (Fallback)
     WHISPER_MODEL_SIZE: str = os.getenv("WHISPER_MODEL_SIZE", "base").strip()
     WHISPER_DEVICE: str = os.getenv("WHISPER_DEVICE", "cpu").strip()
     WHISPER_COMPUTE_TYPE: str = os.getenv("WHISPER_COMPUTE_TYPE", "int8").strip()

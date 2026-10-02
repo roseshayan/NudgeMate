@@ -53,10 +53,13 @@ async def main():
     # Start Scheduler
     scheduler_service.start(bot)
 
-    # Pre-warm Whisper speech recognition model
-    logger.info("Pre-warming Whisper speech recognition model...")
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, voice_service.preload_model)
+    # Mute noisy internal third-party loggers
+    logging.getLogger("apscheduler").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+    # Initialize Voice STT Engine
+    voice_service.preload_model()
 
     # Notify Admin on Startup
     if settings.ADMIN_CHAT_ID:
