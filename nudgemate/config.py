@@ -44,6 +44,18 @@ class Settings:
     DAILY_BRIEFING_ENABLED: bool = os.getenv("DAILY_BRIEFING_ENABLED", "true").lower() in ("true", "1", "yes")
     DAILY_BRIEFING_TIME: str = os.getenv("DAILY_BRIEFING_TIME", "08:30").strip()
 
+    # MeliPayamak SMS Integration & Referral
+    MELIPAYAMAK_API_TOKEN: str = os.getenv("MELIPAYAMAK_API_TOKEN", "0cd932c7f08946509b95519513bbc4be").strip()
+    MELIPAYAMAK_FROM_NUMBER: str = os.getenv("MELIPAYAMAK_FROM_NUMBER", "").strip()
+    MELIPAYAMAK_SHARED_BODY_ID: int = int(os.getenv("MELIPAYAMAK_SHARED_BODY_ID", "0") or "0")
+    MELIPAYAMAK_AFFILIATE_URL: str = "https://melipayamak.com/?aff=DBMRN"
+    MELIPAYAMAK_DISCOUNT_CODE: str = "MPDBMRN"
+    DOPRAX_AFFILIATE_URL: str = "https://www.doprax.com/r/sudoshayan/"
+
+    # Mandatory Channel Join (Force Join)
+    REQUIRED_CHANNEL: str = os.getenv("REQUIRED_CHANNEL", "").strip()
+    CHANNEL_INVITE_LINK: str = os.getenv("CHANNEL_INVITE_LINK", "").strip()
+
     # Auto-Update
     CHECK_UPDATES: bool = os.getenv("CHECK_UPDATES", "true").lower() in ("true", "1", "yes")
     UPDATE_CHECK_INTERVAL_HOURS: int = int(os.getenv("UPDATE_CHECK_INTERVAL_HOURS", "2"))

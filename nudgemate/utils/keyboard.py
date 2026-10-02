@@ -55,3 +55,28 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def get_sms_keyboard(sms_enabled: bool, has_phone: bool, lang: str = "fa") -> InlineKeyboardMarkup:
+    """Settings keyboard for SMS reminders with MeliPayamak affiliate and discount buttons."""
+    from nudgemate.config import settings
+    buttons = []
+    if sms_enabled:
+        buttons.append([InlineKeyboardButton(text="🔴 غیرفعال‌سازی پیامک", callback_data="sms_disable")])
+    else:
+        buttons.append([InlineKeyboardButton(text="🟢 فعال‌سازی پیامک", callback_data="sms_enable")])
+
+    buttons.append([InlineKeyboardButton(text="📞 راهنمای ثبت شماره (/phone)", callback_data="sms_phone_help")])
+    buttons.append([
+        InlineKeyboardButton(
+            text="🎁 خرید پنل پیامک (۱۰٪ تخفیف: MPDBMRN)",
+            url=settings.MELIPAYAMAK_AFFILIATE_URL,
+        )
+    ])
+    buttons.append([
+        InlineKeyboardButton(
+            text="🚀 خرید سرور ابری پرسرعت Doprax (تخفیف ویژه)",
+            url=settings.DOPRAX_AFFILIATE_URL,
+        )
+    ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

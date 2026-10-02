@@ -45,6 +45,11 @@ async def main():
     )
     dp = Dispatcher()
 
+    # Register Middlewares
+    from nudgemate.middlewares.channel_join import ChannelJoinMiddleware
+    dp.message.middleware(ChannelJoinMiddleware())
+    dp.callback_query.middleware(ChannelJoinMiddleware())
+
     # Register Routers (order matters: commands -> callbacks -> general messages)
     dp.include_router(commands.router)
     dp.include_router(callbacks.router)

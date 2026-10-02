@@ -17,6 +17,7 @@ MESSAGES = {
             "دستورات مفید:\n"
             "📋 /tasks - کارهای فعال\n"
             "📝 /notes - یادداشت‌ها (مغز دوم)\n"
+            "📱 /sms - تنظیم یادآوری پیامکی (SMS)\n"
             "☀️ /briefing - گزارش روزانه\n"
             "🌐 /lang - تغییر زبان (Language)\n"
             "📊 /stats - آمار عملکرد شما\n"
@@ -34,6 +35,7 @@ MESSAGES = {
             "Useful Commands:\n"
             "📋 /tasks - Active tasks\n"
             "📝 /notes - Saved notes (Second Brain)\n"
+            "📱 /sms - SMS reminder settings\n"
             "☀️ /briefing - Today's briefing\n"
             "🌐 /lang - Change language\n"
             "📊 /stats - Your productivity stats\n"
@@ -49,6 +51,8 @@ MESSAGES = {
             "وقتی زمان کارت برسه، دکمه‌های [انجام شد] یا [به تعویق انداختن] برات میاد. اگه جواب ندی، ربات پیگیری می‌کنه تا یادت نره!\n\n"
             "۳. **مغز دوم (Second Brain):**\n"
             "هر نکته‌ای خواستی یادت بمونه بگو «یادم باشه...». بعداً می‌تونی بپرسی «فلان چیز کجاست؟» تا جوابت رو بدم.\n\n"
+            "۴. **یادآوری با پیامک (SMS):**\n"
+            "اگر اینترنتت قطع بود یا تلگرام فیلتر شد، با دستور `/phone 09123456789` شمارت رو ثبت کن تا علاوه بر تلگرام، پیامک هشدار هم برات ارسال بشه!\n\n"
             "🌐 تغییر زبان: با دستور /lang می‌تونی زبان ربات رو بین فارسی و انگلیسی تغییر بدی."
         ),
         "en": (
@@ -59,6 +63,8 @@ MESSAGES = {
             "When a reminder triggers, you get buttons to complete or snooze it. If ignored, the bot persistently re-reminds you!\n\n"
             "3. **Second Brain:**\n"
             "Say \"Remember my keys are on the kitchen desk\". Later, ask \"Where are my keys?\" and the bot will recall it.\n\n"
+            "4. **SMS Reminders:**\n"
+            "Set your mobile number via `/phone 09123456789` or `/sms` to receive SMS notifications even when offline!\n\n"
             "🌐 Language: Type /lang to switch between English and Persian."
         ),
     },

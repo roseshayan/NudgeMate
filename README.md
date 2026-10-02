@@ -28,10 +28,25 @@ For busy people, forgetful minds, or individuals with ADHD, traditional task man
 
 **NudgeMate eliminates both problems:**
 - **Zero-Friction Voice Notes:** Driving or walking? Send a 5-second voice note (*"Dentist appointment tomorrow at 4 PM"*).
-- **Fast Local Speech-to-Text:** Transcribed locally via `faster-whisper` (fast, free, private).
-- **AI Task Reasoning:** Powered by **Dahl Global** (`MiniMax M2.7` / `DeepSeek-V4-Flash`), understanding relative dates, Jalali & Gregorian calendars, and priority levels.
+- **Multi-Engine Speech-to-Text:** Instant, highly accurate voice recognition using Google Speech (0% CPU load, free), Groq Cloud Whisper Large V3, or Local Faster-Whisper.
+- **AI Task Reasoning:** Powered by **Dahl Global** (`MiniMax M2.7` / `DeepSeek`), understanding relative dates, Jalali & Gregorian calendars, and priority levels.
+- **SMS Alerts via MeliPayamak:** If your internet disconnects or Telegram is blocked, NudgeMate sends an instant SMS reminder to your phone!
 - **Persistent Nagging Loop:** If you don't mark a task completed or snooze it, NudgeMate follows up every 15 minutes with interactive inline buttons!
+- **Mandatory Channel Membership:** Built-in force-join channel middleware to grow your Telegram community.
 - **Second Brain Memory:** Tell it *"Remember the safe code is 98765"*. Later ask *"What is my safe code?"* and it instantly recalls it.
+
+### 🎁 Recommended Cloud & SMS Providers
+
+| Service | Provider & Offer | Link |
+| :--- | :--- | :--- |
+| 🚀 **High-Speed Cloud VPS** | Deploy NudgeMate on Doprax Cloud | [Get VPS on Doprax](https://www.doprax.com/r/sudoshayan/) |
+| 📱 **SMS Reminder Panel** | **MeliPayamak** (10% Discount Coupon: `MPDBMRN`) | [Buy Panel on MeliPayamak](https://melipayamak.com/?aff=DBMRN) |
+
+<div align="center">
+  <a target="_blank" href="https://melipayamak.com/?aff=DBMRN" title="عضویت در سیستم پیامکی ملی پیامک">
+    <img width="728" height="90" src="https://affiliate.melipayamak.com/storage/banners/P4cYEjkHLTPPVkLnn6elgKF20ywr2T0I5OUOKkgq.gif" alt="MeliPayamak Banner">
+  </a>
+</div>
 
 ### 🚀 Quick Interactive Installer (Ubuntu 24.04)
 
@@ -82,6 +97,8 @@ nudgemate-update    # Pull latest GitHub release
 | `/lang` | Switch language between English and Persian (فارسی / English) |
 | `/tasks` | View pending tasks with action buttons |
 | `/notes` | View Second Brain stored memories |
+| `/sms` | Configure MeliPayamak SMS reminder alerts |
+| `/phone` | Set mobile number for SMS notifications (`/phone 09123456789`) |
 | `/briefing` | Trigger today's daily morning briefing |
 | `/stats` | View completion rate and productivity statistics |
 | `/update` | Check for updates and trigger remote self-upgrade (Admin only) |
@@ -103,10 +120,25 @@ nudgemate-update    # Pull latest GitHub release
 
 **NudgeMate این دو مشکل را برای همیشه حل کرده است:**
 - **ورودی با ویس (Zero Friction):** فقط یک ویس ۵ ثانیه‌ای به ربات بفرستید: *«فردا ساعت ۴ عصر با دکتر قرار دارم»*.
-- **تبدیل صوت به متن:** با مدل محلی `faster-whisper` با سرعت بالا و پشتیبانی عالی از زبان فارسی.
-- **هوش مصنوعی Dahl Global:** استخراج دقیق موعد، اولویت و دسته‌بندی با مدل‌های پیشرفته MiniMax و DeepSeek و درک تقویم شمسی و زبان عامیانه.
+- **موتور تبدیل صوت چندگانه (Multi-Engine STT):** پشتیبانی از Google Speech (دقت ۱۰۰٪ محاوره فارسی، مصرف صفر درصد CPU)، موتور ابری Groq Whisper Large V3 و ویسپر آفلاین.
+- **هوش مصنوعی Dahl Global:** استخراج دقیق موعد، اولویت و دسته‌بندی با مدل‌های پیشرفته MiniMax و DeepSeek و درک تقویم شمسی و اصطلاحات عامیانه.
+- **هشدار پیامکی با ملی‌پیامک:** اگر اینترنت قطع بود یا تلگرام فیلتر شد، پیامک هشدار برای گوشی شما ارسال می‌شود!
 - **سیستم پیگیری سمج (Nagging):** اگر کار را انجام ندهید یا به تعویق نیندازید، ربات هر ۱۵ دقیقه یک‌بار با دکمه‌های شیشه‌ای مجدداً به شما تلنگر می‌زند!
+- **عضویت اجباری در کانال (Force Join):** امکان الزام کاربران به عضویت در کانال تلگرام برای رشد کامیونیتی شما.
 - **مغز دوم (Second Brain):** به ربات بگویید *«یادم باشه ماشین رو تو کوچه پنجم پارک کردم»*. هر زمان بعداً بپرسید *«ماشینم کجاست؟»*، هوش مصنوعی پاسخ شما را می‌دهد.
+
+### 🎁 ارائه‌دهندگان سرور و پنل پیامک با تخفیف ویژه
+
+| سرویس | توضیحات و آفر | لینک خرید |
+| :--- | :--- | :--- |
+| 🚀 **سرور ابری پرسرعت Doprax** | استقرار آسان و سریع NudgeMate | [خرید سرور ابری Doprax](https://www.doprax.com/r/sudoshayan/) |
+| 📱 **پنل پیامکی ملی‌پیامک** | ۱۰٪ تخفیف خرید با کوپن اختصاصی: `MPDBMRN` | [خرید پنل ملی‌پیامک](https://melipayamak.com/?aff=DBMRN) |
+
+<div align="center">
+  <a target="_blank" href="https://melipayamak.com/?aff=DBMRN" title="عضویت در سیستم پیامکی ملی پیامک">
+    <img width="728" height="90" src="https://affiliate.melipayamak.com/storage/banners/P4cYEjkHLTPPVkLnn6elgKF20ywr2T0I5OUOKkgq.gif" alt="بنر ملی‌پیامک">
+  </a>
+</div>
 
 ---
 

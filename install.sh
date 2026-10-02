@@ -230,7 +230,26 @@ read -r -p "Timezone [Asia/Tehran]: " USER_TZ < /dev/tty
 USER_TZ=${USER_TZ:-Asia/Tehran}
 echo -e "${GREEN}✔ Timezone set to: ${USER_TZ}${NC}\n"
 
-# 4.5. Write .env file
+# 4.5. Optional MeliPayamak SMS Integration
+echo -e "${CYAN}5. Configure MeliPayamak SMS Reminders (Optional):${NC}"
+echo -e "${YELLOW}(Sends SMS alerts when due tasks arrive if user enabled SMS)${NC}"
+echo -e "🎁 Buy SMS panel with 10% discount: https://melipayamak.com/?aff=DBMRN (Coupon: MPDBMRN)"
+read -r -p "MeliPayamak API Token [Default: 0cd932c7f08946509b95519513bbc4be]: " MELI_TOKEN < /dev/tty
+MELI_TOKEN=${MELI_TOKEN:-0cd932c7f08946509b95519513bbc4be}
+echo -e "${GREEN}✔ MeliPayamak token configured.${NC}\n"
+
+# 4.6. Optional Mandatory Channel Join
+echo -e "${CYAN}6. Configure Mandatory Channel Join (Optional):${NC}"
+echo -e "${YELLOW}(Requires users to join your Telegram channel to use the bot, e.g. @MyChannel)${NC}"
+read -r -p "Telegram Channel [Leave empty to disable]: " REQ_CHANNEL < /dev/tty
+REQ_CHANNEL=$(echo "$REQ_CHANNEL" | xargs)
+if [ -n "$REQ_CHANNEL" ]; then
+    echo -e "${GREEN}✔ Mandatory Channel Join set to: ${REQ_CHANNEL}${NC}\n"
+else
+    echo -e "${YELLOW}ℹ️ Channel join check disabled.${NC}\n"
+fi
+
+# 4.7. Write .env file
 echo -e "${BLUE}▶ Writing configuration to .env file...${NC}"
 cat <<EOF > "$APP_DIR/.env"
 TELEGRAM_BOT_TOKEN=${TG_TOKEN}
@@ -241,6 +260,11 @@ DAHL_MODEL=MiniMaxAI/MiniMax-M2.7
 STT_ENGINE=auto
 GROQ_API_KEY=
 OPENAI_API_KEY=
+MELIPAYAMAK_API_TOKEN=${MELI_TOKEN}
+MELIPAYAMAK_FROM_NUMBER=
+MELIPAYAMAK_SHARED_BODY_ID=0
+REQUIRED_CHANNEL=${REQ_CHANNEL}
+CHANNEL_INVITE_LINK=
 WHISPER_MODEL_SIZE=base
 WHISPER_DEVICE=cpu
 WHISPER_COMPUTE_TYPE=int8
@@ -362,3 +386,7 @@ echo -e " • ${BOLD}nudgemate status${NC}   : Check service status"
 echo -e " • ${BOLD}nudgemate logs${NC}     : View live logs & events"
 echo -e " • ${BOLD}nudgemate restart${NC}  : Restart the bot"
 echo -e " • ${BOLD}nudgemate-update${NC}   : Pull latest GitHub release\n"
+
+echo -e "${YELLOW}🎁 Recommended Cloud & SMS Providers:${NC}"
+echo -e " • ${BOLD}High-Speed VPS Server${NC}  : https://www.doprax.com/r/sudoshayan/"
+echo -e " • ${BOLD}MeliPayamak 10% Discount${NC}: https://melipayamak.com/?aff=DBMRN (Coupon: ${BOLD}MPDBMRN${NC})\n"

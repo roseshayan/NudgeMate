@@ -27,13 +27,25 @@ class Database:
                 nag_interval_minutes INTEGER DEFAULT 15,
                 max_nag_count INTEGER DEFAULT 3,
                 created_at TEXT,
-                language TEXT DEFAULT 'fa'
+                language TEXT DEFAULT 'fa',
+                phone_number TEXT,
+                sms_enabled INTEGER DEFAULT 0
             );
             """)
 
             # Automatic migration for existing DB
             try:
                 await db.execute("ALTER TABLE users ADD COLUMN language TEXT DEFAULT 'fa';")
+            except Exception:
+                pass
+
+            try:
+                await db.execute("ALTER TABLE users ADD COLUMN phone_number TEXT;")
+            except Exception:
+                pass
+
+            try:
+                await db.execute("ALTER TABLE users ADD COLUMN sms_enabled INTEGER DEFAULT 0;")
             except Exception:
                 pass
 
@@ -78,6 +90,8 @@ class Database:
 
             if row:
                 lang = row["language"] if "language" in row.keys() else "fa"
+                phone = row["phone_number"] if "phone_number" in row.keys() else None
+                sms_en = bool(row["sms_enabled"]) if "sms_enabled" in row.keys() else False
                 return User(
                     user_id=row["user_id"],
                     first_name=row["first_name"],
@@ -89,13 +103,15 @@ class Database:
                     max_nag_count=row["max_nag_count"],
                     created_at=row["created_at"],
                     language=lang or "fa",
+                    phone_number=phone,
+                    sms_enabled=sms_en,
                 )
 
             now_str = datetime.now(timezone.utc).isoformat()
             await db.execute(
                 """
-                INSERT INTO users (user_id, first_name, username, timezone, created_at, language)
-                VALUES (?, ?, ?, ?, ?, 'fa')
+                INSERT INTO users (user_id, first_name, username, timezone, created_at, language, phone_number, sms_enabled)
+                VALUES (?, ?, ?, ?, ?, 'fa', NULL, 0)
                 """,
                 (user_id, first_name, username, settings.TIMEZONE, now_str),
             )
@@ -112,6 +128,8 @@ class Database:
                 max_nag_count=settings.MAX_NAG_COUNT,
                 created_at=now_str,
                 language="fa",
+                phone_number=None,
+                sms_enabled=False,
             )
 
     async def set_user_language(self, user_id: int, language: str):
@@ -120,6 +138,24 @@ class Database:
             await db.execute(
                 "UPDATE users SET language = ? WHERE user_id = ?",
                 (language, user_id),
+            )
+            await db.commit()
+
+    async def set_user_phone(self, user_id: int, phone_number: Optional[str]):
+        """Updates user's phone number for SMS notifications."""
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET phone_number = ? WHERE user_id = ?",
+                (phone_number, user_id),
+            )
+            await db.commit()
+
+    async def set_user_sms_enabled(self, user_id: int, enabled: bool):
+        """Enables or disables SMS reminders for user."""
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET sms_enabled = ? WHERE user_id = ?",
+                (1 if enabled else 0, user_id),
             )
             await db.commit()
 
@@ -132,6 +168,8 @@ class Database:
             if not row:
                 return None
             lang = row["language"] if "language" in row.keys() else "fa"
+            phone = row["phone_number"] if "phone_number" in row.keys() else None
+            sms_en = bool(row["sms_enabled"]) if "sms_enabled" in row.keys() else False
             return User(
                 user_id=row["user_id"],
                 first_name=row["first_name"],
@@ -143,6 +181,8 @@ class Database:
                 max_nag_count=row["max_nag_count"],
                 created_at=row["created_at"],
                 language=lang or "fa",
+                phone_number=phone,
+                sms_enabled=sms_en,
             )
 
 
@@ -407,6 +447,9 @@ class Database:
                     nag_interval_minutes=r["nag_interval_minutes"],
                     max_nag_count=r["max_nag_count"],
                     created_at=r["created_at"],
+                    language=r["language"] if "language" in r.keys() else "fa",
+                    phone_number=r["phone_number"] if "phone_number" in r.keys() else None,
+                    sms_enabled=bool(r["sms_enabled"]) if "sms_enabled" in r.keys() else False,
                 )
                 for r in rows
             ]

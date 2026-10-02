@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 import pytz
@@ -11,6 +12,7 @@ from nudgemate.database.db import db
 from nudgemate.utils.keyboard import get_task_reminder_keyboard
 from nudgemate.utils.time_utils import get_current_time, format_jalali, to_persian_digits
 from nudgemate.services.updater_service import updater_service
+from nudgemate.services.sms_service import sms_service
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +101,17 @@ class SchedulerService:
                     )
                     await db.update_nag_status(task.id, nag_count=1, last_nag_at=iso_now)
                     logger.info(f"Sent reminder for task #{task.id} to user {task.user_id}")
+
+                    # Dispatch SMS notification if user has enabled SMS
+                    if user and user.sms_enabled and user.phone_number and sms_service.is_configured:
+                        time_str = format_jalali(task.remind_at) if lang == "fa" else task.remind_at
+                        asyncio.create_task(
+                            sms_service.send_reminder_sms(
+                                to_phone=user.phone_number,
+                                task_title=task.title,
+                                due_time=time_str,
+                            )
+                        )
                 except Exception as e:
                     logger.error(f"Failed to send reminder for task #{task.id}: {e}")
         except Exception as e:

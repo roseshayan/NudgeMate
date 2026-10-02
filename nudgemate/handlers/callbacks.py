@@ -159,3 +159,68 @@ async def cb_dismiss_update(callback: types.CallbackQuery):
         await callback.message.delete()
     except Exception:
         pass
+
+
+@router.callback_query(F.data == "check_channel_join")
+async def cb_check_channel_join(callback: types.CallbackQuery):
+    bot = callback.bot
+    user = callback.from_user
+    if not settings.REQUIRED_CHANNEL:
+        await callback.answer("عضویت تایید شد! ✅", show_alert=True)
+        return
+
+    try:
+        member = await bot.get_chat_member(chat_id=settings.REQUIRED_CHANNEL, user_id=user.id)
+        if member.status in ("creator", "administrator", "member", "restricted"):
+            await callback.answer("✅ عضویت شما با موفقیت تایید شد! خوش آمدید 🎉", show_alert=True)
+            try:
+                await callback.message.delete()
+            except Exception:
+                pass
+            welcome_text = (
+                f"🎉 **عضویت شما با موفقیت تایید شد!**\n\n"
+                f"به دستیار صوتی و هوشمند NudgeMate خوش اومدی. "
+                f"کافیه یک ویس بفرستی یا کارت رو بنویسی تا سر ساعت دلخواه بهت یادآوری کنم! 🚀\n\n"
+                f"برای راهنما دستور /help را ارسال کنید."
+            )
+            await callback.message.answer(welcome_text, parse_mode="Markdown")
+            return
+    except Exception as e:
+        logger.warning(f"Error checking channel join callback: {e}")
+
+    await callback.answer(
+        "❌ هنوز در کانال عضو نشده‌اید!\nلطفاً ابتدا روی دکمه «عضویت در کانال» کلیک کرده و سپس مجدداً این دکمه را لمس کنید.",
+        show_alert=True,
+    )
+
+
+@router.callback_query(F.data == "sms_disable")
+async def cb_sms_disable(callback: types.CallbackQuery):
+    await db.set_user_sms_enabled(callback.from_user.id, False)
+    await callback.answer("❌ ارسال پیامک غیرفعال شد.")
+    from nudgemate.handlers.commands import send_sms_settings_panel
+    await send_sms_settings_panel(callback.message, callback.from_user.id, edit=True)
+
+
+@router.callback_query(F.data == "sms_enable")
+async def cb_sms_enable(callback: types.CallbackQuery):
+    user = await db.get_user(callback.from_user.id)
+    if not user or not user.phone_number:
+        await callback.answer(
+            "⚠️ لطفاً ابتدا شماره موبایل خود را با دستور زیر وارد کنید:\n/phone 09123456789",
+            show_alert=True,
+        )
+        return
+    await db.set_user_sms_enabled(callback.from_user.id, True)
+    await callback.answer("✅ یادآوری پیامکی فعال شد!")
+    from nudgemate.handlers.commands import send_sms_settings_panel
+    await send_sms_settings_panel(callback.message, callback.from_user.id, edit=True)
+
+
+@router.callback_query(F.data == "sms_phone_help")
+async def cb_sms_phone_help(callback: types.CallbackQuery):
+    await callback.answer(
+        "📱 برای ثبت یا تغییر شماره موبایل، کافیست دستور زیر را به ربات بفرستید:\n/phone 09123456789",
+        show_alert=True,
+    )
+

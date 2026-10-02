@@ -7,6 +7,7 @@ from nudgemate.utils.keyboard import (
     get_single_task_keyboard,
     get_update_notification_keyboard,
     get_language_keyboard,
+    get_sms_keyboard,
 )
 from nudgemate.utils.time_utils import format_jalali, to_persian_digits, format_relative_time
 from nudgemate.utils.i18n import t
@@ -155,3 +156,100 @@ async def cmd_update(message: types.Message):
         parse_mode="Markdown",
     )
     await updater_service.check_github_for_updates(message.bot)
+
+
+@router.message(Command("phone"))
+async def cmd_phone(message: types.Message):
+    user = await db.get_or_create_user(message.from_user.id, message.from_user.first_name)
+    lang = user.language or "fa"
+
+    parts = message.text.strip().split()
+    if len(parts) < 2:
+        cur_phone = user.phone_number or ("ثبت نشده" if lang == "fa" else "Not set")
+        guide = (
+            f"📱 **تنظیم شماره موبایل برای یادآوری پیامکی:**\n\n"
+            f"شماره فعلی شما: `{cur_phone}`\n\n"
+            f"برای ثبت یا تغییر شماره موبایل، دستور را به همراه شماره خود ارسال کنید:\n"
+            f"`/phone 09123456789`"
+            if lang == "fa"
+            else
+            f"📱 **Set Phone Number for SMS Reminders:**\n\n"
+            f"Current Phone: `{cur_phone}`\n\n"
+            f"Usage:\n`/phone 09123456789`"
+        )
+        await message.reply(guide, parse_mode="Markdown")
+        return
+
+    raw_phone = parts[1].strip()
+    phone = raw_phone.replace(" ", "").replace("-", "")
+    if phone.startswith("+98"):
+        phone = "0" + phone[3:]
+    elif phone.startswith("98"):
+        phone = "0" + phone[2:]
+
+    if not phone.startswith("09") or len(phone) != 11 or not phone.isdigit():
+        err = (
+            "❌ شماره موبایل نامعتبر است! شماره باید ۱۱ رقم بوده و با ۰۹ شروع شود.\nمثال: `/phone 09123456789`"
+            if lang == "fa"
+            else "❌ Invalid phone number! Must be 11 digits starting with 09.\nExample: `/phone 09123456789`"
+        )
+        await message.reply(err, parse_mode="Markdown")
+        return
+
+    await db.set_user_phone(message.from_user.id, phone)
+    await db.set_user_sms_enabled(message.from_user.id, True)
+
+    success_msg = (
+        f"✅ **شماره موبایل شما با موفقیت ثبت و پیامک فعال شد!**\n\n"
+        f"📞 شماره: `{phone}`\n\n"
+        f"از این پس هنگام فرا رسیدن موعد کارهایتان، علاوه بر تلگرام، یک پیامک هشدار فوری نیز دریافت خواهید کرد. 🔔\n\n"
+        f"برای مدیریت پیامک‌ها دستور /sms را ارسال کنید."
+        if lang == "fa"
+        else
+        f"✅ **Phone number saved and SMS reminders enabled!**\n\n"
+        f"📞 Phone: `{phone}`\n\n"
+        f"You will now receive SMS alerts when your tasks are due. 🔔"
+    )
+    await message.reply(success_msg, parse_mode="Markdown")
+
+
+@router.message(Command("sms"))
+async def cmd_sms(message: types.Message):
+    await send_sms_settings_panel(message, message.from_user.id, edit=False)
+
+
+async def send_sms_settings_panel(message: types.Message, user_id: int, edit: bool = False):
+    user = await db.get_user(user_id)
+    first_name = message.from_user.first_name if message.from_user else ""
+    if not user:
+        user = await db.get_or_create_user(user_id, first_name)
+    lang = user.language or "fa"
+
+    status_str = "فعال ✅" if user.sms_enabled else "غیرفعال ❌"
+    phone_str = user.phone_number if user.phone_number else "ثبت نشده"
+
+    text = (
+        f"📱 **تنظیمات یادآوری پیامکی (SMS Reminders):**\n\n"
+        f"وضعیت ارسال پیامک: **{status_str}**\n"
+        f"شماره موبایل: `{phone_str}`\n\n"
+        f"ℹ️ با فعال بودن این قابلیت، اگر در زمان موعد کارت به تلگرام دسترسی نداشته باشی یا اینترنتت قطع باشه، یک پیامک هشدار برات ارسال میشه! 🚀\n\n"
+        f"💡 **برای ثبت یا تغییر شماره موبایل:**\n"
+        f"دستور `/phone 09123456789` را ارسال کن.\n\n"
+        f"🎁 **تخفیف ویژه ملی‌پیامک:** ۱۰٪ تخفیف خرید پنل با کد `MPDBMRN`"
+        if lang == "fa"
+        else
+        f"📱 **SMS Reminder Settings:**\n\n"
+        f"SMS Status: **{'Active ✅' if user.sms_enabled else 'Disabled ❌'}**\n"
+        f"Phone Number: `{user.phone_number or 'Not set'}`\n\n"
+        f"To change phone number send: `/phone 09123456789`\n\n"
+        f"🎁 **MeliPayamak Discount:** 10% off with coupon `MPDBMRN`"
+    )
+
+    keyboard = get_sms_keyboard(user.sms_enabled, bool(user.phone_number), lang)
+    if edit:
+        try:
+            await message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+            return
+        except Exception:
+            pass
+    await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")

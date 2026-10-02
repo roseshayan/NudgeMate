@@ -384,6 +384,80 @@
       font-size: 0.95rem;
     }
 
+    /* Partners & Monetization */
+    .partners-section {
+      padding: 60px 0 90px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .partner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+    }
+    .partner-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .partner-card:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-3px);
+    }
+    .partner-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+    .coupon-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #030712;
+      border: 1px dashed rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 0.95rem;
+      margin: 14px 0;
+    }
+    .partner-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      transition: all 0.2s;
+    }
+    .partner-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--card-border);
@@ -538,6 +612,65 @@
           <h3 data-i18n="f6_title">نصب خودکار روی اوبونتو ۲۴</h3>
           <p data-i18n="f6_desc">اسکریپت نصاب هوشمند با ایجاد خودکار اکانت Dahl و اعتبارسنجی حلقه‌ای، بدون هیچ خطایی ربات را در قالب سرویس پایدار systemd اجرا می‌کند.</p>
         </div>
+
+        <!-- Feature 7 -->
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h3 data-i18n="f7_title">تشخیص گفتار چندموتوره و هوشمند</h3>
+          <p data-i18n="f7_desc">پشتیبانی همزمان از Google Speech رایگان با دقت ۹۹٪ زبان فارسی، هوش مصنوعی Groq، OpenAI و Whisper محلی بدون نیاز به سخت‌افزار گران‌قیمت.</p>
+        </div>
+
+        <!-- Feature 8 -->
+        <div class="card">
+          <div class="card-icon">📲</div>
+          <h3 data-i18n="f8_title">یادآوری پیامکی (ملی‌پیامک)</h3>
+          <p data-i18n="f8_desc">اگر اینترنت سرور یا فیلترشکن کاربر قطع باشد، ربات موعد تسک‌های مهم را مستقیماً از طریق پیامک به گوشی ارسال می‌کند.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partners & Cloud Infrastructure -->
+  <section class="partners-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title" data-i18n="partners_title">زیرساخت پیشنهادی و تخفیف‌ها</h2>
+        <p class="section-desc" data-i18n="partners_desc">برای اجرای ۲۴ ساعته و ارسال هشدارهای پیامکی، می‌توانید از سرویس‌های تست‌شده زیر استفاده نمایید:</p>
+      </div>
+
+      <div class="partner-grid">
+        <!-- MeliPayamak Card -->
+        <div class="partner-card">
+          <div>
+            <span class="partner-badge" data-i18n="p1_badge">پنل پیامکی رسمی</span>
+            <h3 style="font-size: 1.3rem; margin-bottom: 8px;" data-i18n="p1_title">سامانه ملی‌پیامک (MeliPayamak)</h3>
+            <p data-i18n="p1_desc">ارسال پیامک‌های یادآوری بدون افتادن در لیست بلک‌لیست مخابرات (خطوط خدماتی و الگوهای OTP). با کد تخفیف اختصاصی نادج‌میت خرید کنید:</p>
+            <div class="coupon-code">
+              <span>🎁 کد تخفیف ۱۰٪:</span>
+              <strong>MPDBMRN</strong>
+            </div>
+            <div style="margin-top: 14px; text-align: center;">
+              <a href="https://melipayamak.com/?aff=DBMRN" target="_blank" rel="noopener noreferrer">
+                <img src="https://static.melipayamak.com/front/affiliate-banner/468-60.gif" alt="سامانه ارسال پیامک ملی پیامک" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);" />
+              </a>
+            </div>
+          </div>
+          <a href="https://melipayamak.com/?aff=DBMRN" target="_blank" rel="noopener noreferrer" class="partner-btn" data-i18n="p1_btn">
+            ورود به سامانه ملی‌پیامک ↗
+          </a>
+        </div>
+
+        <!-- Doprax Card -->
+        <div class="partner-card">
+          <div>
+            <span class="partner-badge" data-i18n="p2_badge">هاستینگ ابری پیشنهادی</span>
+            <h3 style="font-size: 1.3rem; margin-bottom: 8px;" data-i18n="p2_title">سرورهای ابری Doprax Cloud</h3>
+            <p data-i18n="p2_desc">بهترین سرورهای مجازی اروپایی با آی‌پی تمیز و اتصال دائمی به تلگرام بدون فیلتر. مناسب اجرای پایدار اسکریپت نصب تک‌خطی NudgeMate.</p>
+          </div>
+          <a href="https://www.doprax.com/r/sudoshayan/" target="_blank" rel="noopener noreferrer" class="partner-btn" data-i18n="p2_btn">
+            دریافت سرور ابری Doprax ↗
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -579,7 +712,21 @@
         f5_title: "آپدیت اتوماتیک درون تلگرام",
         f5_desc: "با انتشار نسخه جدید در گیت‌هاب، ادمین اعلان دریافت کرده و تنها با یک کلیک روی دکمه شیشه‌ای، ربات سورس را دانلود و آپدیت می‌کند.",
         f6_title: "نصب خودکار روی اوبونتو ۲۴",
-        f6_desc: "اسکریپت نصاب هوشمند با ایجاد خودکار اکانت Dahl و اعتبارسنجی حلقه‌ای، بدون هیچ خطایی ربات را در قالب سرویس پایدار systemd اجرا می‌کند."
+        f6_desc: "اسکریپت نصاب هوشمند با ایجاد خودکار اکانت Dahl و اعتبارسنجی حلقه‌ای، بدون هیچ خطایی ربات را در قالب سرویس پایدار systemd اجرا می‌کند.",
+        f7_title: "تشخیص گفتار چندموتوره و هوشمند",
+        f7_desc: "پشتیبانی همزمان از Google Speech رایگان با دقت ۹۹٪ زبان فارسی، هوش مصنوعی Groq، OpenAI و Whisper محلی بدون نیاز به سخت‌افزار گران‌قیمت.",
+        f8_title: "یادآوری پیامکی (ملی‌پیامک)",
+        f8_desc: "اگر اینترنت سرور یا فیلترشکن کاربر قطع باشد، ربات موعد تسک‌های مهم را مستقیماً از طریق پیامک به گوشی ارسال می‌کند.",
+        partners_title: "زیرساخت پیشنهادی و تخفیف‌ها",
+        partners_desc: "برای اجرای ۲۴ ساعته و ارسال هشدارهای پیامکی، می‌توانید از سرویس‌های تست‌شده زیر استفاده نمایید:",
+        p1_badge: "پنل پیامکی رسمی",
+        p1_title: "سامانه ملی‌پیامک (MeliPayamak)",
+        p1_desc: "ارسال پیامک‌های یادآوری بدون افتادن در لیست بلک‌لیست مخابرات (خطوط خدماتی و الگوهای OTP). با کد تخفیف اختصاصی نادج‌میت خرید کنید:",
+        p1_btn: "ورود به سامانه ملی‌پیامک ↗",
+        p2_badge: "هاستینگ ابری پیشنهادی",
+        p2_title: "سرورهای ابری Doprax Cloud",
+        p2_desc: "بهترین سرورهای مجازی اروپایی با آی‌پی تمیز و اتصال دائمی به تلگرام بدون فیلتر. مناسب اجرای پایدار اسکریپت نصب تک‌خطی NudgeMate.",
+        p2_btn: "دریافت سرور ابری Doprax ↗"
       },
       en: {
         badge: "Powered by Dahl AI + Faster-Whisper Local STT",
@@ -607,7 +754,21 @@
         f5_title: "In-App 1-Click Auto Update",
         f5_desc: "When an update is pushed to GitHub, admins get notified in Telegram and can upgrade the entire server codebase with a single button.",
         f6_title: "Automated Ubuntu 24.04 Setup",
-        f6_desc: "Interactive installer features automatic Dahl AI registration with 100M free gift tokens and runs 24/7 as a systemd service."
+        f6_desc: "Interactive installer features automatic Dahl AI registration with 100M free gift tokens and runs 24/7 as a systemd service.",
+        f7_title: "Smart Multi-Engine Speech-to-Text",
+        f7_desc: "Combines zero-cost Google Speech with 99% Persian recognition accuracy, Groq AI, OpenAI, and local Whisper fallbacks.",
+        f8_title: "SMS Task Reminders (MeliPayamak)",
+        f8_desc: "Never miss crucial deadlines even when Telegram or VPN is offline; task reminders dispatch directly to your cell phone via SMS.",
+        partners_title: "Recommended Infrastructure & Discounts",
+        partners_desc: "Run 24/7 with zero downtime and reliable SMS delivery using our recommended and tested cloud providers:",
+        p1_badge: "Official SMS Gateway",
+        p1_title: "MeliPayamak SMS Gateway",
+        p1_desc: "Reliable SMS delivery bypassing telecom blacklists (OTP & shared service lines). Enjoy an exclusive 10% discount on all packages:",
+        p1_btn: "Open MeliPayamak Console ↗",
+        p2_badge: "Recommended Cloud VPS",
+        p2_title: "Doprax Cloud Infrastructure",
+        p2_desc: "High-speed European cloud servers with clean IPs and unblocked Telegram access. Perfect for 1-click NudgeMate installation.",
+        p2_btn: "Deploy on Doprax Cloud ↗"
       }
     };
 

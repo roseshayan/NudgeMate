@@ -38,3 +38,5 @@ class User:
     max_nag_count: int
     created_at: str
     language: str = "fa"
+    phone_number: Optional[str] = None
+    sms_enabled: bool = False
