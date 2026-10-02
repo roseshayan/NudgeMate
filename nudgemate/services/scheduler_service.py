@@ -70,14 +70,26 @@ class SchedulerService:
         try:
             tasks = await db.get_due_tasks(iso_now)
             for task in tasks:
-                text = (
-                    f"⏰ **وقتشه رفیق!**\n\n"
-                    f"📌 **{task.title}**\n"
-                    f"🏷 دسته‌بندی: #{task.category}\n"
-                    f"⚡️ اولویت: {task.priority}\n\n"
-                    f"لطفاً وضعیت کار رو مشخص کن تا حواسم بهت باشه:"
-                )
-                keyboard = get_task_reminder_keyboard(task.id)
+                user = await db.get_user(task.user_id)
+                lang = user.language if user else "fa"
+
+                if lang == "fa":
+                    text = (
+                        f"⏰ **وقتشه رفیق!**\n\n"
+                        f"📌 **{task.title}**\n"
+                        f"🏷 دسته‌بندی: #{task.category}\n"
+                        f"⚡️ اولویت: {task.priority}\n\n"
+                        f"لطفاً وضعیت کار رو مشخص کن:"
+                    )
+                else:
+                    text = (
+                        f"⏰ **Time's up!**\n\n"
+                        f"📌 **{task.title}**\n"
+                        f"🏷 Category: #{task.category}\n"
+                        f"⚡️ Priority: {task.priority}\n\n"
+                        f"Please update task status:"
+                    )
+                keyboard = get_task_reminder_keyboard(task.id, lang)
                 try:
                     await self.bot.send_message(
                         chat_id=task.user_id,
@@ -114,14 +126,27 @@ class SchedulerService:
                 delta = (now - last_nag).total_seconds() / 60.0
                 if delta >= settings.NAG_INTERVAL_MINUTES:
                     new_nag_count = task.nag_count + 1
-                    nag_badge = to_persian_digits(f"{new_nag_count}/{settings.MAX_NAG_COUNT}")
-                    text = (
-                        f"⚠️ **یادآوری مجدد ({nag_badge})!**\n\n"
-                        f"هنوز به این کارت رسیدگی نکردی رفیق:\n"
-                        f"📌 **{task.title}**\n\n"
-                        f"انجامش دادی یا به تعویق بندازیمش؟"
-                    )
-                    keyboard = get_task_reminder_keyboard(task.id)
+                    user = await db.get_user(task.user_id)
+                    lang = user.language if user else "fa"
+
+                    if lang == "fa":
+                        nag_badge = to_persian_digits(f"{new_nag_count}/{settings.MAX_NAG_COUNT}")
+                        text = (
+                            f"⚠️ **یادآوری مجدد ({nag_badge})!**\n\n"
+                            f"هنوز به این کارت رسیدگی نکردی رفیق:\n"
+                            f"📌 **{task.title}**\n\n"
+                            f"انجامش دادی یا به تعویق بندازیمش؟"
+                        )
+                    else:
+                        nag_badge = f"{new_nag_count}/{settings.MAX_NAG_COUNT}"
+                        text = (
+                            f"⚠️ **Follow-up Reminder ({nag_badge})!**\n\n"
+                            f"You haven't resolved this task yet:\n"
+                            f"📌 **{task.title}**\n\n"
+                            f"Done or snooze for later?"
+                        )
+
+                    keyboard = get_task_reminder_keyboard(task.id, lang)
                     try:
                         await self.bot.send_message(
                             chat_id=task.user_id,
@@ -150,25 +175,38 @@ class SchedulerService:
                 if not user.daily_briefing_enabled:
                     continue
 
+                lang = user.language or "fa"
                 tasks = await db.get_user_pending_tasks(user.user_id)
-                # Filter tasks scheduled for today
                 today_tasks = [
                     t for t in tasks
                     if t.remind_at.startswith(today_str)
                 ]
 
                 if not today_tasks:
-                    msg = (
-                        f"☀️ **صبح بخیر {user.first_name}!**\n\n"
-                        f"امروز هیچ تسک مشخصی ثبت نشده. روزت رو با آرامش شروع کن! ☕️\n\n"
-                        f"اگر کاری پیش اومد، ویس یا متنش رو برام بفرست."
-                    )
+                    if lang == "fa":
+                        msg = (
+                            f"☀️ **صبح بخیر {user.first_name}!**\n\n"
+                            f"امروز هیچ تسک مشخصی ثبت نشده. روزت رو با آرامش شروع کن! ☕️\n\n"
+                            f"اگر کاری پیش اومد، ویس یا متنش رو برام بفرست."
+                        )
+                    else:
+                        msg = (
+                            f"☀️ **Good morning {user.first_name}!**\n\n"
+                            f"You have no tasks scheduled for today. Have a peaceful day! ☕️\n\n"
+                            f"Send me a voice note or message anytime."
+                        )
                 else:
-                    lines = [f"☀️ **صبح بخیر {user.first_name}!**\nبرنامه امروز شما:"]
-                    for idx, t in enumerate(today_tasks, 1):
-                        jalali_time = format_jalali(t.remind_at)
-                        lines.append(f"{to_persian_digits(idx)}. 📌 **{t.title}** ({jalali_time})")
-                    lines.append("\nامروز پر انرژی باش! هر تغییری بود در خدمتم. 🚀")
+                    if lang == "fa":
+                        lines = [f"☀️ **صبح بخیر {user.first_name}!**\nبرنامه امروز شما:"]
+                        for idx, t_item in enumerate(today_tasks, 1):
+                            time_str = format_jalali(t_item.remind_at)
+                            lines.append(f"{to_persian_digits(idx)}. 📌 **{t_item.title}** ({time_str})")
+                        lines.append("\nامروز پر انرژی باش! هر تغییری بود در خدمتم. 🚀")
+                    else:
+                        lines = [f"☀️ **Good morning {user.first_name}!**\nHere is your schedule for today:"]
+                        for idx, t_item in enumerate(today_tasks, 1):
+                            lines.append(f"{idx}. 📌 **{t_item.title}** ({t_item.remind_at})")
+                        lines.append("\nHave an energetic day! 🚀")
                     msg = "\n".join(lines)
 
                 try:

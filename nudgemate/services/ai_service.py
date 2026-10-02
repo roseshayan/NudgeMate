@@ -29,13 +29,13 @@ class AIService:
             cleaned = re.sub(r"\s*```$", "", cleaned)
         return cleaned.strip()
 
-    async def analyze_message(self, user_text: str) -> dict:
+    async def analyze_message(self, user_text: str, lang: str = "fa") -> dict:
         """
         Analyzes user input (voice transcript or text) and returns a structured intent.
         Intents:
           - 'task': Has a reminder time or is an actionable task.
           - 'note': Information to remember (Second Brain), without specific deadline.
-          - 'query': Asking about existing tasks or notes (e.g. 'کارهام برای امروز چیه؟').
+          - 'query': Asking about existing tasks or notes.
           - 'chitchat': Greetings or general conversation.
         """
         now = get_current_time()
@@ -48,34 +48,38 @@ class AIService:
         weekday = weekdays[jdt.weekday()]
         shamsi_str = f"{weekday} {jdt.year}/{jdt.month}/{jdt.day} ساعت {jdt.strftime('%H:%M')}"
 
+        lang_instruction = (
+            "Response language: Persian (فارسی). Output title and reply_text in Persian."
+            if lang == "fa"
+            else "Response language: English. Output title and reply_text in English."
+        )
+
         system_prompt = f"""
-تو دستیار هوشمند و شخصی به نام NudgeMate هستی؛ یک دستیار مهربان، دقیق و حواس‌جمع برای ثبت تسک‌ها، ریمایندرها و یادداشت‌ها.
+You are NudgeMate, a smart, friendly, and attentive personal task reminder and second brain assistant.
 
-اطلاعات زمانی سرور و کاربر:
-- زمان فعلی میلادی: {iso_now} (منطقه زمانی: {tz_name})
-- زمان فعلی شمسی: {shamsi_str}
+Server Time Information:
+- Current ISO Time: {iso_now} (Timezone: {tz_name})
+- Current Persian (Jalali) Time: {shamsi_str}
 
-وظیفه تو این است که متن کاربر را تحلیل کنی و فقط و فقط یک JSON با ساختار زیر تحویل دهی. هیچ متن اضافی یا توضیحاتی قبل و بعد از JSON ننویس.
+Language Instruction: {lang_instruction}
 
-ساختار خروجی JSON:
+Analyze the user's input and output ONLY a valid JSON object matching the schema below:
 {{
     "intent": "task" | "note" | "query" | "chitchat",
-    "title": "عنوان خلاصه و تمیز کار یا یادداشت (به فارسی)",
-    "remind_at": "YYYY-MM-DDTHH:MM:SS" یا null (زمان دقیق یادآوری به وقت محلی سرور),
+    "title": "Clean, concise title of the task or note",
+    "remind_at": "YYYY-MM-DDTHH:MM:SS" or null (exact reminder datetime in server local time),
     "category": "work" | "personal" | "health" | "finance" | "shopping" | "general",
     "priority": "low" | "medium" | "high",
-    "reply_text": "یک پاسخ کوتاه، پرانرژی و صمیمی به زبان فارسی برای تایید به کاربر"
+    "reply_text": "A brief, warm confirmation or reply message to the user"
 }}
 
-قوانین حیاتی زمان‌بندی:
-۱. اگر کاربر گفت «نیم ساعت دیگه»، ۳۰ دقیقه به زمان فعلی ({iso_now}) اضافه کن.
-۲. اگر گفت «فردا ساعت ۴ عصر»، تاریخ فردا با ساعت ۱۶:۰۰:۰۰ را در remind_at بگذار.
-۳. اگر گفت «پس‌فردا»، ۲ روز به تاریخ فعلی اضافه کن.
-۴. اگر تاریخ شمسی گفت (مثل «۲۵ مهر ساعت ۱۰»)، آن را به تاریخ میلادی متناظر دقیق در فرمت YYYY-MM-DDTHH:MM:SS تبدیل کن.
-۵. اگر کار زمان‌دار بود، intent حتماً 'task' و remind_at باید تاریخ دقیق میلادی باشد.
-۶. اگر نکته‌ای برای به خاطر سپردن بود اما زمان مشخصی نداشت (مثلاً «یادم باشه رمز گاوصندوق اینه» یا «ماشین رو کوچه سوم پارک کردم»)، intent را 'note' بگذار و remind_at را null قرار بده.
-۷. اگر سوالی در مورد کارها یا یادداشت‌ها پرسید (مثل «کارهای امروزم چیه؟» یا «ماشینم کجاست؟»)، intent را 'query' بگذار.
-۸. اگر فقط احوال‌پرسی یا گپ بود، intent را 'chitchat' بگذار.
+Rules:
+1. Relative times ("in 30 minutes", "نیم ساعت دیگه") -> add to current time {iso_now}.
+2. "Tomorrow at 4 PM" / "فردا ساعت ۴ عصر" -> calculate exact tomorrow date at 16:00:00.
+3. Jalali dates like "۲۵ مهر ساعت ۱۰" -> convert to equivalent Gregorian ISO format in remind_at.
+4. Memos/facts to remember without specific time -> intent='note', remind_at=null.
+5. Questions about past notes/tasks -> intent='query'.
+6. Greetings -> intent='chitchat'.
 """
 
         try:
@@ -97,56 +101,59 @@ class AIService:
         except Exception as e:
             logger.error(f"Error in Dahl AI analysis: {e}", exc_info=True)
             # Fallback response
+            fallback_reply = "پیامت رو ثبت کردم رفیق!" if lang == "fa" else "Got your message, saved!"
             return {
                 "intent": "task",
                 "title": user_text[:50],
                 "remind_at": None,
                 "category": "general",
                 "priority": "medium",
-                "reply_text": "پیامت رو ثبت کردم رفیق!",
+                "reply_text": fallback_reply,
             }
 
-    async def answer_second_brain_query(self, user_query: str, tasks: list, notes: list) -> str:
+    async def answer_second_brain_query(self, user_query: str, tasks: list, notes: list, lang: str = "fa") -> str:
         """
         Synthesizes an intelligent answer for user queries using their saved tasks and notes.
         """
-        now = get_current_time()
         context_lines = []
         
         if tasks:
-            context_lines.append("تسک‌ها و برنامه‌های ثبت شده:")
+            context_lines.append("Tasks / Plans:")
             for t in tasks:
-                context_lines.append(f"- {t.title} (زمان: {t.remind_at}, وضعیت: {t.status})")
+                context_lines.append(f"- {t.title} (due: {t.remind_at}, status: {t.status})")
         
         if notes:
-            context_lines.append("\nیادداشت‌ها و حافظه ذخیره شده:")
+            context_lines.append("\nNotes / Memory:")
             for n in notes:
-                context_lines.append(f"- {n.content} (تاریخ: {n.created_at})")
+                context_lines.append(f"- {n.content} (date: {n.created_at})")
 
-        context_text = "\n".join(context_lines) if context_lines else "هیچ اطلاعاتی یافت نشد."
+        context_text = "\n".join(context_lines) if context_lines else "No data stored yet."
+        lang_text = "Respond in Persian (فارسی)." if lang == "fa" else "Respond in English."
 
         prompt = f"""
-تو NudgeMate هستی. کاربر سوالی درباره برنامه‌ها، کارها یا یادداشت‌های گذشته‌اش پرسیده است.
-بر اساس اطلاعات موجود زیر، با لحنی صمیمی، کوتاه و دقیق پاسخ بده.
+You are NudgeMate. The user is asking about their tasks, schedule, or stored memories.
+{lang_text}
+Use the information below to give a concise, warm, and accurate response:
 
-اطلاعات موجود کاربر:
+Stored Information:
 {context_text}
 
-سوال کاربر: {user_query}
+User Question: {user_query}
 """
         try:
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "تو دستیار هوشمند و صمیمی NudgeMate هستی."},
+                    {"role": "system", "content": "You are NudgeMate personal AI assistant."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
             )
-            return response.choices[0].message.content or "پاسخی پیدا نشد."
+            return response.choices[0].message.content or ("پاسخی پیدا نشد." if lang == "fa" else "No answer found.")
         except Exception as e:
             logger.error(f"Error querying second brain: {e}")
-            return "متاسفانه نتونستم حافظه رو جستجو کنم، ولی تسک‌هات توی دیتابیس محفوظه."
+            return "متاسفانه نتونستم حافظه رو جستجو کنم." if lang == "fa" else "Could not search memory right now."
+
 
 
 ai_service = AIService()

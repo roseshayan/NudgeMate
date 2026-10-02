@@ -13,32 +13,32 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}[ERROR] لطفاً این اسکریپت را با sudo یا root اجرا کنید.${NC}"
+  echo -e "${RED}[ERROR] Please run this script with root or sudo privileges.${NC}"
   exit 1
 fi
 
-echo -e "${YELLOW}${BOLD}آیا از حذف کامل NudgeMate مطمئن هستید؟ (y/n)${NC}"
+echo -e "${YELLOW}${BOLD}Are you sure you want to completely uninstall NudgeMate? (y/n)${NC}"
 read -r -p "[y/n]: " CONFIRM
 if [[ ! "$CONFIRM" =~ ^[Yy] ]]; then
-    echo "عملیات لغو شد."
+    echo "Uninstallation canceled."
     exit 0
 fi
 
-echo -e "\nدر حال متوقف کردن و حذف سرویس systemd..."
+echo -e "\nStopping and disabling systemd service..."
 systemctl stop nudgemate 2>/dev/null || true
 systemctl disable nudgemate 2>/dev/null || true
 rm -f /etc/systemd/system/nudgemate.service
 systemctl daemon-reload
 
-echo "در حال حذف دستورات میانبر..."
+echo "Removing CLI command shortcuts..."
 rm -f /usr/local/bin/nudgemate
 rm -f /usr/local/bin/nudgemate-update
 
-echo -e "${YELLOW}آیا مایل به حذف داده‌ها و دیتابیس در /opt/nudgemate هستید؟ (y/n)${NC}"
+echo -e "${YELLOW}Would you also like to delete data & database in /opt/nudgemate? (y/n)${NC}"
 read -r -p "[y/n]: " DEL_DATA
 if [[ "$DEL_DATA" =~ ^[Yy] ]]; then
     rm -rf /opt/nudgemate
-    echo "دایرکتوری /opt/nudgemate حذف شد."
+    echo "Directory /opt/nudgemate has been removed."
 fi
 
-echo -e "\n${GREEN}✔ NudgeMate با موفقیت از سرور شما پاکسازی شد.${NC}"
+echo -e "\n${GREEN}✔ NudgeMate has been cleanly uninstalled from your server.${NC}"

@@ -17,31 +17,31 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-echo -e "\n${CYAN}${BOLD}▶ در حال شروع فرآیند بروزرسانی NudgeMate...${NC}"
+echo -e "\n${CYAN}${BOLD}▶ Starting NudgeMate update process...${NC}"
 
 OLD_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-echo -e "${YELLOW}نسخه فعلی: ${OLD_COMMIT}${NC}"
+echo -e "${YELLOW}Current Version: ${OLD_COMMIT}${NC}"
 
 # 1. Fetch and reset to latest remote main
-echo -e "${BLUE}▶ در حال دریافت آخرین تغییرات از گیت‌هاب...${NC}"
+echo -e "${BLUE}▶ Fetching latest changes from GitHub...${NC}"
 git fetch origin main
 git reset --hard origin/main
 
 NEW_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-echo -e "${GREEN}نسخه جدید دریافت شده: ${NEW_COMMIT}${NC}"
+echo -e "${GREEN}New Version Downloaded: ${NEW_COMMIT}${NC}"
 
 # 2. Update Python dependencies if needed
 if [ -d "venv" ]; then
-    echo -e "${BLUE}▶ در حال بررسی و بروزرسانی پکیج‌های پایتون...${NC}"
+    echo -e "${BLUE}▶ Updating Python dependencies...${NC}"
     ./venv/bin/pip install -r requirements.txt -q
 fi
 
 # 3. Ensure permissions
-chmod +x install.sh update.sh 2>/dev/null || true
+chmod +x install.sh update.sh uninstall.sh 2>/dev/null || true
 
 # 4. Restart systemd service if running
 if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nudgemate 2>/dev/null; then
-    echo -e "${BLUE}▶ در حال راه‌اندازی مجدد سرویس nudgemate...${NC}"
+    echo -e "${BLUE}▶ Restarting nudgemate systemd service...${NC}"
     if [ "$EUID" -eq 0 ]; then
         systemctl daemon-reload
         systemctl restart nudgemate
@@ -49,7 +49,7 @@ if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nudgemate
         sudo systemctl daemon-reload
         sudo systemctl restart nudgemate
     fi
-    echo -e "${GREEN}✔ سرویس با موفقیت ری‌استارت شد.${NC}"
+    echo -e "${GREEN}✔ NudgeMate service restarted successfully.${NC}"
 fi
 
-echo -e "\n${GREEN}${BOLD}✔ بروزرسانی با موفقیت به پایان رسید! (از ${OLD_COMMIT} به ${NEW_COMMIT})${NC}\n"
+echo -e "\n${GREEN}${BOLD}✔ Update completed successfully! (${OLD_COMMIT} -> ${NEW_COMMIT})${NC}\n"

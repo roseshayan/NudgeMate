@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NudgeMate | AI Voice Reminder & Second Brain Telegram Bot</title>
+  <meta name="description" content="NudgeMate is an open-source, AI-powered Telegram bot with voice-to-text, persistent nagging reminders, and second brain memory powered by Dahl AI & Faster-Whisper." />
+  <meta name="keywords" content="telegram bot, task manager, reminder, voice bot, artificial intelligence, whisper, dahl global, second brain, python" />
+  <meta property="og:title" content="NudgeMate | AI Voice Reminder & Second Brain Bot" />
+  <meta property="og:description" content="Never forget anything again. Zero-friction voice reminders and persistent AI follow-ups." />
+  <meta property="og:url" content="https://roseshayan.github.io/NudgeMate/" />
+  
+  <!-- Google Fonts: Vazirmatn & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: rgba(22, 29, 49, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.35);
+      --secondary: #06b6d4;
+      --accent: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-fa: 'Vazirmatn', sans-serif;
+      --font-en: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-fa);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 40%);
+    }
+
+    body.lang-en {
+      font-family: var(--font-en);
+      direction: ltr;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(11, 15, 25, 0.75);
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-badge {
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #c7d2fe;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      -webkit-text-fill-color: initial;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-lang {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-lang:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-github {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: white;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-github:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px var(--primary-glow);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 90px 0 60px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      color: #a5b4fc;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #a5b4fc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 36px;
+    }
+
+    /* One Line Terminal Command */
+    .command-box {
+      max-width: 680px;
+      margin: 0 auto 40px;
+      background: #030712;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .command-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .btn-copy {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f8fafc;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Interactive Telegram Mockup */
+    .mockup-container {
+      max-width: 480px;
+      margin: 0 auto 80px;
+      background: #17212b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      direction: ltr;
+    }
+
+    .mockup-header {
+      background: #242f3d;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mockup-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .mockup-bot-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .mockup-bot-info p {
+      font-size: 0.78rem;
+      color: #5288c1;
+    }
+
+    .mockup-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #0e1621;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: #2b5278;
+      border-bottom-right-radius: 2px;
+      color: #ffffff;
+    }
+
+    .msg.bot {
+      align-self: flex-start;
+      background: #182533;
+      border-bottom-left-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .keyboard-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .kb-btn {
+      background: #242f3d;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #64b5f6;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Features Grid */
+    .features-section {
+      padding: 40px 0 80px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      .command-box {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      .btn-copy {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container nav-wrapper">
+      <div class="logo">
+        🤖 NudgeMate
+        <span class="logo-badge">v1.0.0</span>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-lang" id="langToggle">
+          <span id="langFlag">🇬🇧</span> <span id="langLabel">English</span>
+        </button>
+        <a href="https://github.com/roseshayan/NudgeMate" target="_blank" class="btn-github">
+          ⭐ Star on GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        ✨ <span data-i18n="badge">هوش مصنوعی Dahl + موتور صوتی Faster-Whisper</span>
+      </div>
+      <h1 class="hero-title">
+        <span data-i18n="hero_title_1">دیگر هیچ کاری را فراموش نکنید.</span><br />
+        <span data-i18n="hero_title_2">دستیار صوتی و سمجی که حواسش به همه چیز هست!</span>
+      </h1>
+      <p class="hero-subtitle" data-i18n="hero_subtitle">
+        با ویس یا متن به زبان عامیانه کارهایت را به تلگرام بگو؛ هوش مصنوعی زمان دقیق را می‌فهمد و با سیستم پیگیری سمج تا انجام کار دست از سرت برنمی‌دارد!
+      </p>
+
+      <!-- Terminal Command -->
+      <div class="command-box">
+        <div class="command-code" id="cmdText">curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh | sudo bash</div>
+        <button class="btn-copy" onclick="copyCommand()">
+          📋 <span data-i18n="copy">کپی دستور نصب</span>
+        </button>
+      </div>
+
+      <!-- Telegram Mockup Preview -->
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-avatar">🤖</div>
+          <div class="mockup-bot-info">
+            <h4>NudgeMate AI</h4>
+            <p>bot • online</p>
+          </div>
+        </div>
+        <div class="mockup-body">
+          <div class="msg user" data-i18n="mock_user_msg">
+            🎙 0:04 (فردا ساعت ۴ عصر با دکتر رضایی قرار دارم)
+          </div>
+          <div class="msg bot">
+            <span data-i18n="mock_bot_msg">
+              ✅ <b>یادآوری با موفقیت تنظیم شد!</b><br />
+              📌 قرار با دکتر رضایی<br />
+              ⏰ موعد: فردا ساعت ۱۶:۰۰ (۲۴ ساعت دیگر)<br />
+              🏷 دسته‌بندی: #سلامتی | اولویت: بالا
+            </span>
+            <div class="keyboard-preview">
+              <div class="kb-btn" data-i18n="btn_done">✅ انجام شد</div>
+              <div class="kb-btn" data-i18n="btn_snooze_10">⏳ ۱۰ دقیقه بعد</div>
+              <div class="kb-btn" data-i18n="btn_snooze_60">⏳ ۱ ساعت بعد</div>
+              <div class="kb-btn" data-i18n="btn_snooze_day">🔁 فردا</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title" data-i18n="features_title">چرا NudgeMate متفاوت است؟</h2>
+        <p class="section-desc" data-i18n="features_desc">ترکیب سادگی تلگرام با قدرت هوش مصنوعی برای افراد پرمشغله یا حواس‌پرت</p>
+      </div>
+
+      <div class="grid">
+        <!-- Feature 1 -->
+        <div class="card">
+          <div class="card-icon">🎙️</div>
+          <h3 data-i18n="f1_title">ورودی صوتی بدون اصطکاک (Zero Friction)</h3>
+          <p data-i18n="f1_desc">هنگام رانندگی یا پیاده‌روی فقط دکمه ویس را نگه دارید؛ ویس شما با مدل محلی Faster-Whisper به سرعت به متن و تسک تبدیل می‌شود.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3 data-i18n="f2_title">هوش مصنوعی Dahl Inference</h3>
+          <p data-i18n="f2_desc">اتصال به مدل‌های قدرتمند MiniMax M2.7 و DeepSeek با درک تقویم شمسی و اصطلاحات عامیانه مثل «نیم ساعت دیگه» یا «پس‌فردا».</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="card">
+          <div class="card-icon">⏰</div>
+          <h3 data-i18n="f3_title">سیستم پیگیری سمج (Nagging Loop)</h3>
+          <p data-i18n="f3_desc">آلارم‌های معمولی فراموش می‌شوند! نادج‌میت اگر پاسخی ندهید، هر ۱۵ دقیقه مجدداً با دکمه‌های تمدید یا انجام شد تلنگر می‌زند.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <h3 data-i18n="f4_title">مغز دوم و حافظه کمکی (Second Brain)</h3>
+          <p data-i18n="f4_desc">بگویید «یادم باشه رمز گاوصندوق فلانه». هر زمان بعداً بپرسید «رمز گاوصندوق چی بود؟»، هوش مصنوعی آن را برایتان بازخوانی می‌کند.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <h3 data-i18n="f5_title">آپدیت اتوماتیک درون تلگرام</h3>
+          <p data-i18n="f5_desc">با انتشار نسخه جدید در گیت‌هاب، ادمین اعلان دریافت کرده و تنها با یک کلیک روی دکمه شیشه‌ای، ربات سورس را دانلود و آپدیت می‌کند.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="card">
+          <div class="card-icon">⚡️</div>
+          <h3 data-i18n="f6_title">نصب خودکار روی اوبونتو ۲۴</h3>
+          <p data-i18n="f6_desc">اسکریپت نصاب هوشمند با ایجاد خودکار اکانت Dahl و اعتبارسنجی حلقه‌ای، بدون هیچ خطایی ربات را در قالب سرویس پایدار systemd اجرا می‌کند.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>
+        Created with ❤️ by <a href="https://github.com/roseshayan" target="_blank">Shayan (roseshayan)</a> • Open Source under MIT License.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+      fa: {
+        badge: "هوش مصنوعی Dahl + موتور صوتی Faster-Whisper",
+        hero_title_1: "دیگر هیچ کاری را فراموش نکنید.",
+        hero_title_2: "دستیار صوتی و سمجی که حواسش به همه چیز هست!",
+        hero_subtitle: "با ویس یا متن به زبان عامیانه کارهایت را به تلگرام بگو؛ هوش مصنوعی زمان دقیق را می‌فهمد و با سیستم پیگیری سمج تا انجام کار دست از سرت برنمی‌دارد!",
+        copy: "کپی دستور نصب",
+        copied: "کپی شد! ✔",
+        mock_user_msg: "🎙 0:04 (فردا ساعت ۴ عصر با دکتر رضایی قرار دارم)",
+        mock_bot_msg: "✅ <b>یادآوری با موفقیت تنظیم شد!</b><br />📌 قرار با دکتر رضایی<br />⏰ موعد: فردا ساعت ۱۶:۰۰ (۲۴ ساعت دیگر)<br />🏷 دسته‌بندی: #سلامتی | اولویت: بالا",
+        btn_done: "✅ انجام شد",
+        btn_snooze_10: "⏳ ۱۰ دقیقه بعد",
+        btn_snooze_60: "⏳ ۱ ساعت بعد",
+        btn_snooze_day: "🔁 فردا",
+        features_title: "چرا NudgeMate متفاوت است؟",
+        features_desc: "ترکیب سادگی تلگرام با قدرت هوش مصنوعی برای افراد پرمشغله یا حواس‌پرت",
+        f1_title: "ورودی صوتی بدون اصطکاک (Zero Friction)",
+        f1_desc: "هنگام رانندگی یا پیاده‌روی فقط دکمه ویس را نگه دارید؛ ویس شما با مدل محلی Faster-Whisper به سرعت به متن و تسک تبدیل می‌شود.",
+        f2_title: "هوش مصنوعی Dahl Inference",
+        f2_desc: "اتصال به مدل‌های قدرتمند MiniMax M2.7 و DeepSeek با درک تقویم شمسی و اصطلاحات عامیانه مثل «نیم ساعت دیگه» یا «پس‌فردا».",
+        f3_title: "سیستم پیگیری سمج (Nagging Loop)",
+        f3_desc: "آلارم‌های معمولی فراموش می‌شوند! نادج‌میت اگر پاسخی ندهید، هر ۱۵ دقیقه مجدداً با دکمه‌های تمدید یا انجام شد تلنگر می‌زند.",
+        f4_title: "مغز دوم و حافظه کمکی (Second Brain)",
+        f4_desc: "بگویید «یادم باشه رمز گاوصندوق فلانه». هر زمان بعداً بپرسید «رمز گاوصندوق چی بود؟»، هوش مصنوعی آن را برایتان بازخوانی می‌کند.",
+        f5_title: "آپدیت اتوماتیک درون تلگرام",
+        f5_desc: "با انتشار نسخه جدید در گیت‌هاب، ادمین اعلان دریافت کرده و تنها با یک کلیک روی دکمه شیشه‌ای، ربات سورس را دانلود و آپدیت می‌کند.",
+        f6_title: "نصب خودکار روی اوبونتو ۲۴",
+        f6_desc: "اسکریپت نصاب هوشمند با ایجاد خودکار اکانت Dahl و اعتبارسنجی حلقه‌ای، بدون هیچ خطایی ربات را در قالب سرویس پایدار systemd اجرا می‌کند."
+      },
+      en: {
+        badge: "Powered by Dahl AI + Faster-Whisper Local STT",
+        hero_title_1: "Never Forget What Matters.",
+        hero_title_2: "The Persistent AI Voice Reminder Bot!",
+        hero_subtitle: "Send a quick voice note or text in natural language; AI extracts deadlines and nags you persistently until you actually get it done!",
+        copy: "Copy Install Command",
+        copied: "Copied! ✔",
+        mock_user_msg: "🎙 0:04 (\"Doctor appointment tomorrow at 4 PM\")",
+        mock_bot_msg: "✅ <b>Reminder scheduled successfully!</b><br />📌 Doctor Appointment<br />⏰ Due: Tomorrow 16:00 (in 24 hours)<br />🏷 Category: #Health | Priority: High",
+        btn_done: "✅ Done",
+        btn_snooze_10: "⏳ In 10 mins",
+        btn_snooze_60: "⏳ In 1 hour",
+        btn_snooze_day: "🔁 Tomorrow",
+        features_title: "Why NudgeMate Stands Out?",
+        features_desc: "Telegram's zero-friction input meets state-of-the-art LLM task reasoning for busy minds.",
+        f1_title: "Zero-Friction Voice Input",
+        f1_desc: "Driving or walking? Just hold the voice button. Local Faster-Whisper instantly transcribes your speech into an actionable task.",
+        f2_title: "Dahl AI Engine (MiniMax & DeepSeek)",
+        f2_desc: "Understands complex relative dates ('in 20 minutes', 'next Monday 10 AM', Shamsi & Gregorian calendars) effortlessly.",
+        f3_title: "Persistent Nagging Loop",
+        f3_desc: "Standard alarms get swiped and forgotten. NudgeMate checks back every 15 minutes with interactive buttons until you resolve it.",
+        f4_title: "Second Brain Memory",
+        f4_desc: "Say 'Remember my locker code is 98765'. Ask 'What is my locker code?' later, and AI retrieves it from your memory base.",
+        f5_title: "In-App 1-Click Auto Update",
+        f5_desc: "When an update is pushed to GitHub, admins get notified in Telegram and can upgrade the entire server codebase with a single button.",
+        f6_title: "Automated Ubuntu 24.04 Setup",
+        f6_desc: "Interactive installer features automatic Dahl AI registration with 100M free gift tokens and runs 24/7 as a systemd service."
+      }
+    };
+
+    let currentLang = 'fa';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const isEn = lang === 'en';
+      document.body.classList.toggle('lang-en', isEn);
+      document.documentElement.lang = lang;
+      document.documentElement.dir = isEn ? 'ltr' : 'rtl';
+
+      document.getElementById('langFlag').textContent = isEn ? '🇮🇷' : '🇬🇧';
+      document.getElementById('langLabel').textContent = isEn ? 'فارسی' : 'English';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+    }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      setLanguage(currentLang === 'fa' ? 'en' : 'fa');
+    });
+
+    function copyCommand() {
+      const text = document.getElementById('cmdText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtnText = document.querySelector('[data-i18n="copy"]');
+        if (copyBtnText) {
+          const original = copyBtnText.innerText;
+          copyBtnText.innerText = translations[currentLang].copied;
+          setTimeout(() => {
+            copyBtnText.innerText = original;
+          }, 2000);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

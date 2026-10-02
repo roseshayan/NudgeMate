@@ -37,3 +37,4 @@ class User:
     nag_interval_minutes: int
     max_nag_count: int
     created_at: str
+    language: str = "fa"

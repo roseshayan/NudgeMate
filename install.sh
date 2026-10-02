@@ -29,20 +29,20 @@ echo "  |  \| | | | |/ _\` |/ _\` |/ _ \ |\/| |/ _\` | __/ _ \ "
 echo "  | |\  | |_| | (_| | (_| |  __/ |  | | (_| | ||  __/ "
 echo "  |_| \_|\__,_|\__,_|\__, |\___|_|  |_|\__,_|\__\___| "
 echo "                     |___/                            "
-echo "        دستیار هوشمند مدیریت تسک و یادآوری پیگیر        "
+echo "      AI-Powered Task Manager & Voice Reminder Bot       "
 echo "================================================================="
 echo -e "${NC}"
-echo -e "${CYAN}شروع فرآیند نصب و راه‌اندازی NudgeMate روی اوبونتو 24...${NC}\n"
+echo -e "${CYAN}Starting NudgeMate installation on Ubuntu 24.04...${NC}\n"
 
 # 1. Check Root Privileges
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}[ERROR] لطفاً این اسکریپت را با دسترسی root یا sudo اجرا کنید:${NC}"
+  echo -e "${RED}[ERROR] Please run this script with root privileges or sudo:${NC}"
   echo "sudo bash install.sh"
   exit 1
 fi
 
 # 2. Update System Packages & Install Dependencies
-echo -e "${BLUE}▶ در حال بررسی و نصب پیش‌نیازهای سیستمی (Python3, FFMPEG, Git, Curl)...${NC}"
+echo -e "${BLUE}▶ Checking and installing required packages (Python3, FFMPEG, Git, Curl, JQ)...${NC}"
 apt-get update -qq
 apt-get install -y -qq \
     python3 \
@@ -53,87 +53,87 @@ apt-get install -y -qq \
     curl \
     jq > /dev/null
 
-echo -e "${GREEN}✔ پیش‌نیازهای سیستمی با موفقیت نصب شدند.${NC}\n"
+echo -e "${GREEN}✔ System dependencies installed successfully.${NC}\n"
 
 # 3. Clone or Update Repository
 if [ -d "$APP_DIR/.git" ]; then
-    echo -e "${YELLOW}پوشه $APP_DIR از قبل موجود است. در حال دریافت آخرین نسخه...${NC}"
+    echo -e "${YELLOW}Directory $APP_DIR already exists. Fetching latest updates...${NC}"
     cd "$APP_DIR"
     git fetch origin
     git reset --hard origin/main
 else
-    echo -e "${BLUE}▶ در حال دانلود سورس کد NudgeMate از گیت‌هاب...${NC}"
+    echo -e "${BLUE}▶ Cloning NudgeMate repository from GitHub...${NC}"
     mkdir -p "$APP_DIR"
     git clone "$REPO_URL" "$APP_DIR"
     cd "$APP_DIR"
 fi
 
 echo -e "\n${BOLD}====================================================="
-echo -e "       مرحله پیکربندی و اعتبارسنجی ورودی‌ها         "
+echo -e "         Configuration & Input Validation            "
 echo -e "=====================================================${NC}\n"
 
 # 4. Strict Validation: Telegram Bot Token
 while true; do
-    echo -e "${CYAN}۱. لطفاً توکن ربات تلگرام خود را وارد کنید:${NC}"
-    echo -e "${YELLOW}(توکن دریافتی از @BotFather به فرمت 123456:ABC-DEF...)${NC}"
+    echo -e "${CYAN}1. Enter your Telegram Bot Token:${NC}"
+    echo -e "${YELLOW}(Obtain this from @BotFather, e.g. 123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11)${NC}"
     read -r -p "Telegram Bot Token: " TG_TOKEN
     TG_TOKEN=$(echo "$TG_TOKEN" | xargs)
 
     if [ -z "$TG_TOKEN" ]; then
-        echo -e "${RED}✖ خطا: توکن نمی‌تواند خالی باشد!${NC}\n"
+        echo -e "${RED}✖ Error: Bot token cannot be empty!${NC}\n"
         continue
     fi
 
-    echo -e "${BLUE}در حال بررسی صحت توکن در سرور تلگرام...${NC}"
+    echo -e "${BLUE}Validating token with Telegram API...${NC}"
     TG_CHECK=$(curl -s "https://api.telegram.org/bot${TG_TOKEN}/getMe")
     IS_OK=$(echo "$TG_CHECK" | jq -r '.ok // false')
 
     if [ "$IS_OK" == "true" ]; then
         BOT_USERNAME=$(echo "$TG_CHECK" | jq -r '.result.username')
         BOT_NAME=$(echo "$TG_CHECK" | jq -r '.result.first_name')
-        echo -e "${GREEN}✔ توکن معتبر است! نام ربات: ${BOLD}${BOT_NAME} (@${BOT_USERNAME})${NC}\n"
+        echo -e "${GREEN}✔ Valid token! Connected to: ${BOLD}${BOT_NAME} (@${BOT_USERNAME})${NC}\n"
         break
     else
-        ERROR_DESC=$(echo "$TG_CHECK" | jq -r '.description // "توکن وارد شده معتبر نیست"')
-        echo -e "${RED}✖ خطا در اعتبارسنجی: ${ERROR_DESC}${NC}"
-        echo -e "${YELLOW}لطفاً توکن را مجدداً با دقت وارد کنید.${NC}\n"
+        ERROR_DESC=$(echo "$TG_CHECK" | jq -r '.description // "Invalid bot token"')
+        echo -e "${RED}✖ Verification failed: ${ERROR_DESC}${NC}"
+        echo -e "${YELLOW}Please re-enter your bot token carefully.${NC}\n"
     fi
 done
 
 # 5. Strict Validation: Admin Telegram ID
 while true; do
-    echo -e "${CYAN}۲. لطفاً شناسه عددی (Chat ID) تلگرام مدیر را وارد کنید:${NC}"
-    echo -e "${YELLOW}(می‌توانید با ارسال پیام به ربات @userinfobot یا @userinfobot شناسه‌تان را ببینید، مثلاً 98765432)${NC}"
+    echo -e "${CYAN}2. Enter Admin Telegram User ID (numeric):${NC}"
+    echo -e "${YELLOW}(Send a message to @userinfobot on Telegram to get your numeric ID, e.g. 98765432)${NC}"
     read -r -p "Admin Telegram Chat ID: " ADMIN_ID
     ADMIN_ID=$(echo "$ADMIN_ID" | xargs)
 
     if [[ "$ADMIN_ID" =~ ^[0-9]+$ ]] && [ "$ADMIN_ID" -gt 0 ]; then
-        echo -e "${GREEN}✔ شناسه کاربری تایید شد: ${ADMIN_ID}${NC}\n"
+        echo -e "${GREEN}✔ Admin ID verified: ${ADMIN_ID}${NC}\n"
         break
     else
-        echo -e "${RED}✖ خطا: شناسه تلگرام باید یک مقدار عددی صحیح و بزرگتر از صفر باشد!${NC}\n"
+        echo -e "${RED}✖ Error: Chat ID must be a positive integer!${NC}\n"
     fi
 done
 
 # 6. Dahl AI Configuration: Automatic Email Registration or Manual Key
-echo -e "${CYAN}۳. نحوه تنظیم هوش مصنوعی Dahl:${NC}"
-echo -e "   ${BOLD}[1]${NC} ${GREEN}ساخت خودکار اکانت Dahl با ایمیل و تخصیص ۱۰۰ میلیون توکن هدیه (پیشنهادی 🌟)${NC}"
-echo -e "   ${BOLD}[2]${NC} وارد کردن کلید API به صورت دستی (اگر از قبل اکانت دارید)"
+echo -e "${CYAN}3. Configure Dahl AI Engine:${NC}"
+echo -e "   ${BOLD}[1]${NC} ${GREEN}Automatic account creation with Email + 100M free tokens (Recommended 🌟)${NC}"
+echo -e "   ${BOLD}[2]${NC} Enter existing Dahl API Key manually"
 
 while true; do
-    read -r -p "گزینه مورد نظر را انتخاب کنید [1/2] (پیش‌فرض: 1): " DAHL_CHOICE
+    read -r -p "Select option [1/2] (Default: 1): " DAHL_CHOICE
     DAHL_CHOICE=${DAHL_CHOICE:-1}
 
     if [ "$DAHL_CHOICE" == "1" ]; then
         # Automatic Signup via Email
         while true; do
-            echo -e "\n${CYAN}لطفاً ایمیل خود را برای ساخت اکانت وارد کنید:${NC}"
-            echo -e "${YELLOW}(برای ساخت شناسه و ثبت در سیستم هوش مصنوعی استفاده می‌شود)${NC}"
+            echo -e "\n${CYAN}Enter your email address to create Dahl AI account:${NC}"
+            echo -e "${YELLOW}(Used to generate unique identifier and register at inference.dahl.global)${NC}"
             read -r -p "Email: " USER_EMAIL
             USER_EMAIL=$(echo "$USER_EMAIL" | xargs)
 
             if [[ "$USER_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-                echo -e "${BLUE}در حال ساخت خودکار اکانت و اختصاص ۱۰۰ میلیون توکن در Dahl Global...${NC}"
+                echo -e "${BLUE}Registering account and allocating 100M tokens on Dahl Global...${NC}"
                 
                 # Execute Python auth helper
                 AUTH_RESULT=$(python3 "$APP_DIR/nudgemate/utils/dahl_auth.py" "$USER_EMAIL" 2>/dev/null || true)
@@ -145,11 +145,11 @@ while true; do
                     DAHL_FP=$(echo "$AUTH_RESULT" | jq -r '.fingerprint')
                     DAHL_TOKENS=$(echo "$AUTH_RESULT" | jq -r '.allocated_tokens // 100000000')
 
-                    echo -e "\n${GREEN}${BOLD}✔ اکانت هوش مصنوعی شما با موفقیت ساخته شد! 🎉${NC}"
-                    echo -e "👤 نام کاربری: ${BOLD}${DAHL_USER}${NC}"
-                    echo -e "🔑 کلید API: ${BOLD}${DAHL_KEY:0:15}...${NC}"
-                    echo -e "🎁 توکن‌های اختصاص‌یافته: ${BOLD}${DAHL_TOKENS}${NC}"
-                    echo -e "🔐 اثر انگشت (کلمه عبور جهت ورود به سایت): ${YELLOW}${BOLD}${DAHL_FP}${NC}"
+                    echo -e "\n${GREEN}${BOLD}✔ Dahl AI account created successfully! 🎉${NC}"
+                    echo -e "👤 Username: ${BOLD}${DAHL_USER}${NC}"
+                    echo -e "🔑 API Key: ${BOLD}${DAHL_KEY:0:15}...${NC}"
+                    echo -e "🎁 Allocated Tokens: ${BOLD}${DAHL_TOKENS}${NC}"
+                    echo -e "🔐 Fingerprint (Your login password): ${YELLOW}${BOLD}${DAHL_FP}${NC}"
                     
                     # Save credentials securely to a hidden file
                     cat <<CRED_EOF > "$APP_DIR/.dahl_credentials"
@@ -160,21 +160,21 @@ API_KEY=${DAHL_KEY}
 ALLOCATED_TOKENS=${DAHL_TOKENS}
 CRED_EOF
                     chmod 600 "$APP_DIR/.dahl_credentials"
-                    echo -e "${CYAN}ℹ️ این مشخصات در فایل ${APP_DIR}/.dahl_credentials ذخیره شد.${NC}\n"
+                    echo -e "${CYAN}ℹ️ Credentials saved to ${APP_DIR}/.dahl_credentials${NC}\n"
                     break 2
                 else
-                    AUTH_ERR=$(echo "$AUTH_RESULT" | jq -r '.error // "خطای ناشناخته در ارتباط با سرور Dahl"')
-                    echo -e "${RED}✖ خطا در ساخت خودکار اکانت: ${AUTH_ERR}${NC}"
-                    echo -e "${YELLOW}آیا می‌خواهید با ایمیل دیگری امتحان کنید؟ (y/n): ${NC}"
+                    AUTH_ERR=$(echo "$AUTH_RESULT" | jq -r '.error // "Unknown connection error with Dahl server"')
+                    echo -e "${RED}✖ Failed to create account automatically: ${AUTH_ERR}${NC}"
+                    echo -e "${YELLOW}Would you like to try with another email? (y/n): ${NC}"
                     read -r -p "[y/n]: " RETRY_SIGNUP
                     if [[ "$RETRY_SIGNUP" =~ ^[Nn] ]]; then
-                        echo -e "${YELLOW}تغییر به حالت وارد کردن دستی کلید API...${NC}\n"
+                        echo -e "${YELLOW}Switching to manual API Key entry...${NC}\n"
                         DAHL_CHOICE="2"
                         break
                     fi
                 fi
             else
-                echo -e "${RED}✖ خطا: فرمت ایمیل نامعتبر است! لطفاً ایمیل صحیح وارد کنید.${NC}"
+                echo -e "${RED}✖ Error: Invalid email format! Please enter a valid email address.${NC}"
             fi
         done
     fi
@@ -182,49 +182,49 @@ CRED_EOF
     if [ "$DAHL_CHOICE" == "2" ]; then
         # Manual API Key Input
         while true; do
-            echo -e "\n${CYAN}لطفاً کلید API سرویس Dahl Inference را وارد کنید:${NC}"
-            echo -e "${YELLOW}(از سایت https://inference.dahl.global/account کلید را کپی کنید)${NC}"
+            echo -e "\n${CYAN}Enter your Dahl Inference API Key:${NC}"
+            echo -e "${YELLOW}(Copy your key from https://inference.dahl.global/account)${NC}"
             read -r -p "Dahl API Key: " DAHL_KEY
             DAHL_KEY=$(echo "$DAHL_KEY" | xargs)
 
             if [ -z "$DAHL_KEY" ]; then
-                echo -e "${RED}✖ خطا: کلید API نمی‌تواند خالی باشد!${NC}\n"
+                echo -e "${RED}✖ Error: API key cannot be empty!${NC}\n"
                 continue
             fi
 
-            echo -e "${BLUE}در حال بررسی اعتبار کلید API در سرویس Dahl...${NC}"
+            echo -e "${BLUE}Verifying API key with Dahl Global...${NC}"
             DAHL_CHECK=$(curl -s -m 10 "https://inference.dahl.global/tokens/current" -H "Authorization: Bearer ${DAHL_KEY}" || true)
             
             if echo "$DAHL_CHECK" | grep -q "available_tokens"; then
-                AVAIL_TOKENS=$(echo "$DAHL_CHECK" | jq -r '.available_tokens // "موجود"')
-                echo -e "${GREEN}✔ کلید Dahl معتبر است! توکن‌های تخصیص‌یافته: ${AVAIL_TOKENS}${NC}\n"
+                AVAIL_TOKENS=$(echo "$DAHL_CHECK" | jq -r '.available_tokens // "available"')
+                echo -e "${GREEN}✔ Valid Dahl Key! Allocated tokens: ${AVAIL_TOKENS}${NC}\n"
                 break 2
             elif echo "$DAHL_CHECK" | grep -q "402"; then
-                echo -e "${YELLOW}⚠ کلید معتبر است اما موجودی توکن آن 0 است. بعد از نصب می‌توانید در سایت به کلید توکن اختصاص دهید.${NC}\n"
+                echo -e "${YELLOW}⚠ Key is valid but has 0 allocated tokens. Please allocate tokens from your pool at /account.${NC}\n"
                 break 2
             else
-                echo -e "${RED}✖ کلید API وارد شده معتبر نیست یا سرور در دسترس نیست!${NC}"
-                echo -e "${YELLOW}آیا می‌خواهید دوباره وارد کنید؟ (y/n): ${NC}"
+                echo -e "${RED}✖ API Key is invalid or expired!${NC}"
+                echo -e "${YELLOW}Would you like to re-enter your key? (y/n): ${NC}"
                 read -r -p "[y/n]: " RETRY_KEY
                 if [[ "$RETRY_KEY" =~ ^[Nn] ]]; then
-                    echo -e "${YELLOW}استفاده از کلید وارد شده ادامه می‌یابد.${NC}\n"
+                    echo -e "${YELLOW}Continuing with entered key...${NC}\n"
                     break 2
                 fi
             fi
         done
     else
-        echo -e "${RED}✖ لطفاً عدد 1 یا 2 را انتخاب کنید.${NC}"
+        echo -e "${RED}✖ Please select either 1 or 2.${NC}"
     fi
 done
 
 # 7. Timezone Configuration
-echo -e "${CYAN}۴. منطقه زمانی (پیش‌فرض: Asia/Tehran):${NC}"
+echo -e "${CYAN}4. Configure Server Timezone (Default: Asia/Tehran):${NC}"
 read -r -p "Timezone [Asia/Tehran]: " USER_TZ
 USER_TZ=${USER_TZ:-Asia/Tehran}
-echo -e "${GREEN}✔ منطقه زمانی تنظیم شد: ${USER_TZ}${NC}\n"
+echo -e "${GREEN}✔ Timezone set to: ${USER_TZ}${NC}\n"
 
 # 8. Create .env file
-echo -e "${BLUE}▶ در حال ذخیره تنظیمات در فایل .env...${NC}"
+echo -e "${BLUE}▶ Writing configuration to .env file...${NC}"
 cat <<EOF > "$APP_DIR/.env"
 TELEGRAM_BOT_TOKEN=${TG_TOKEN}
 ADMIN_CHAT_ID=${ADMIN_ID}
@@ -247,7 +247,7 @@ TEMP_AUDIO_DIR=temp_audio
 EOF
 
 # 9. Setup Python Virtual Environment
-echo -e "${BLUE}▶ در حال راه‌اندازی محیط مجازی پایتون (venv) و نصب پکیج‌ها...${NC}"
+echo -e "${BLUE}▶ Setting up Python virtual environment (venv) and dependencies...${NC}"
 cd "$APP_DIR"
 if [ ! -d "venv" ]; then
     python3 -m venv venv
@@ -255,10 +255,10 @@ fi
 
 ./venv/bin/pip install --upgrade pip -q
 ./venv/bin/pip install -r requirements.txt -q
-echo -e "${GREEN}✔ پکیج‌های پایتون با موفقیت نصب شدند.${NC}\n"
+echo -e "${GREEN}✔ Python packages installed successfully.${NC}\n"
 
 # 10. Setup Systemd Service
-echo -e "${BLUE}▶ در حال تنظیم سرویس خودکار systemd...${NC}"
+echo -e "${BLUE}▶ Configuring systemd service for 24/7 background operation...${NC}"
 CURRENT_USER=$(logname 2>/dev/null || echo "$SUDO_USER")
 if [ -z "$CURRENT_USER" ] || [ "$CURRENT_USER" == "root" ]; then
     CURRENT_USER="root"
@@ -293,7 +293,7 @@ systemctl enable nudgemate.service
 systemctl restart nudgemate.service
 
 # 11. Create Quick CLI Shortcuts
-echo -e "${BLUE}▶ در حال ایجاد دستورات تک‌خطی در سیستم...${NC}"
+echo -e "${BLUE}▶ Registering global command shortcuts...${NC}"
 
 # nudgemate-update command
 cat << 'EOF' > /usr/local/bin/nudgemate-update
@@ -336,12 +336,12 @@ EOF
 chmod +x /usr/local/bin/nudgemate
 
 echo -e "\n${GREEN}${BOLD}================================================================="
-echo "       🎉 تبریک! NudgeMate با موفقیت نصب و فعال شد!             "
+echo "       🎉 Congratulations! NudgeMate is installed & active!     "
 echo "=================================================================${NC}"
-echo -e "${CYAN}همین الان می‌توانید وارد ربات تلگرام خود شوید و دکمه /start را بزنید:${NC}"
+echo -e "${CYAN}Open your Telegram app and send /start to your bot:${NC}"
 echo -e "👉 ${BOLD}https://t.me/${BOT_USERNAME}${NC}\n"
-echo -e "${PURPLE}دستورات مفید ترمینال:${NC}"
-echo -e " • ${BOLD}nudgemate status${NC}   : بررسی وضعیت سرویس"
-echo -e " • ${BOLD}nudgemate logs${NC}     : مشاهده زنده لاگ‌ها و پیام‌ها"
-echo -e " • ${BOLD}nudgemate restart${NC}  : راه‌اندازی مجدد ربات"
-echo -e " • ${BOLD}nudgemate-update${NC}   : بروزرسانی مستقیم به آخرین نسخه گیت‌هاب\n"
+echo -e "${PURPLE}Useful Terminal Commands:${NC}"
+echo -e " • ${BOLD}nudgemate status${NC}   : Check service status"
+echo -e " • ${BOLD}nudgemate logs${NC}     : View live logs & events"
+echo -e " • ${BOLD}nudgemate restart${NC}  : Restart the bot"
+echo -e " • ${BOLD}nudgemate-update${NC}   : Pull latest GitHub code & reload\n"

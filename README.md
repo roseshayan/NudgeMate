@@ -1,143 +1,150 @@
 # 🤖 NudgeMate
 
-> **دستیار هوشمند مدیریت تسک، ریمایندر صوتی و مغز دوم با هوش مصنوعی**  
-> *AI-Powered Telegram Reminder & Second Brain Bot (Voice & Text)*
+> **AI-Powered Voice Reminder & Second Brain Telegram Bot**  
+> *دستیار صوتی هوشمند مدیریت تسک، ریمایندر پیگیر و مغز دوم با هوش مصنوعی*
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-orange.svg)](https://ubuntu.com/)
-[![Telegram](https://img.shields.io/badge/Telegram-aiogram%203.x-2CA5E0.svg)](https://docs.aiogram.dev/)
-[![AI](https://img.shields.io/badge/LLM-Dahl%20Inference-green.svg)](https://inference.dahl.global/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<div align="center">
 
----
+[![Website](https://img.shields.io/badge/Website-NudgeMate%20Landing-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white)](https://roseshayan.github.io/NudgeMate/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Telegram](https://img.shields.io/badge/Telegram-aiogram%203.x-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://docs.aiogram.dev/)
+[![LLM](https://img.shields.io/badge/AI%20Engine-Dahl%20Global-10b981?style=for-the-badge)](https://inference.dahl.global/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-## 💡 چرا NudgeMate؟
+**[🇬🇧 English](#-english) • [🇮🇷 فارسی](#-فارسی)**
 
-آدم‌های پرمشغله یا حواس‌پرت همیشه با دو مشکل اساسی روبرو هستند:
-1. **اصطکاک بالا در ثبت کارها:** باز کردن یک اپلیکیشن مدیریت وظایف، تایپ کردن عنوان، انتخاب تاریخ و ساعت و تگ‌زدن وقت‌گیر است و در وسط کارها فراموش می‌شود.
-2. **بی‌خاصیت بودن نوتیفیکیشن‌های معمولی:** یک آلارم ساده می‌آید، آن را می‌بندید و ۲ دقیقه بعد کار را دوباره از یاد می‌برید!
-
-**NudgeMate** این دو مشکل را برای همیشه حل کرده است:
-* **ورودی با ویس (Zero Friction):** در حال رانندگی یا پیاده‌روی هستید؟ فقط یک ویس ۵ ثانیه‌ای به ربات بفرستید: *«فردا ساعت ۴ عصر با دکتر قرار دارم»* یا *«نیم ساعت دیگه زیر گازو خاموش کن»*.
-* **تحلیل هوشمند با AI:** ویس شما با سرعت بالا به متن تبدیل شده و با مدل‌های پیشرفته هوش مصنوعی (مثل MiniMax و DeepSeek در **Dahl Global**) تحلیل می‌شود؛ تاریخ شمسی، ساعت دقیق و اولویت کار خودکار استخراج می‌شود.
-* **سیستم یادآوری سمج (Nagging System):** اگر وقت انجام کار برسد و به ربات اعلام نکنید که انجام شده یا به تعویق بیفتد، ربات شما را رها نمی‌کند و با دکمه‌های شیشه‌ای مجدداً به شما تلنگر می‌زند!
-* **مغز دوم (Second Brain):** به ربات بگویید: *«یادم باشه ماشین رو تو کوچه پنجم پارک کردم»*. هر زمان بعداً بپرسید *«ماشینم کجاست؟»*، ربات هوشمندانه به شما پاسخ می‌دهد.
+</div>
 
 ---
 
-## ✨ ویژگی‌های برجسته
+<a name="english"></a>
+## 🇬🇧 English
 
-- 🎙️ **پشتیبانی کامل از پیام‌های صوتی (Voice):** تبدیل گفتار به نوشتار محلی و سریع با کتابخانه `faster-whisper`.
-- 🧠 **هوش مصنوعی Dahl Inference:** سازگار با مدل‌های برتر دنیا نظیر `MiniMax M2.7` و `DeepSeek-V4-Flash`.
-- ⏰ **سیستم یادآوری تعاملی با دکمه‌های شیشه‌ای:**
-  - `[✅ انجام شد]`
-  - `[⏳ ۱۰ دقیقه بعد]`
-  - `[⏳ ۱ ساعت بعد]`
-  - `[🔁 فردا همین موقع]`
-- 🔄 **سیستم خودکار بررسی و اعمال آپدیت‌ها:**
-  - هربار نسخه جدیدی در گیت‌هاب منتشر شود، ربات یک نوتیفیکیشن اختصاصی به ادمین ارسال می‌کند.
-  - ادمین می‌تواند با کلیک روی دکمه `[ 🚀 بروزرسانی به نسخه جدید ]` ربات را بدون دست زدن به سرور آپدیت کند!
-  - یا با دستور تک‌خطی `nudgemate-update` در ترمینال سرور، آخرین نسخه را دریافت نماید.
-- ☀️ **گزارش صبحگاهی (Daily Briefing):** هر روز صبح ساعت ۰۸:۳۰ خلاصه کارهای روزانه شما را ارسال می‌کند.
-- 📅 **درک زبان عامیانه و تاریخ شمسی:** پشتیبانی از عباراتی مثل «فردا عصر»، «۲۰ دقیقه دیگه»، «پس‌فردا ساعت ۱۰»، «شنبه اول ماه».
-- 🛡️ **نصب آسان روی اوبونتو 24 با اعتبارسنجی ورودی‌ها:** نصاب خودکار تمام خطاها را بررسی می‌کند و در صورت اشتباه بودن توکن یا کلیدها، از قطع شدن نصب جلوگیری کرده و مجدداً سوال می‌پرسد.
-- ⚙️ **مدیریت از طریق Systemd:** پایداری همیشگی، روشن شدن خودکار پس از ری‌استارت سرور و بازیابی در صورت قطعی اینترنت.
+### 💡 Why NudgeMate?
+For busy people, forgetful minds, or individuals with ADHD, traditional task managers fail because:
+1. **High friction input:** Opening an app, typing titles, and tapping date/time pickers takes too long and gets abandoned.
+2. **Ignored notifications:** A silent banner notification arrives, you dismiss it, and forget it two minutes later.
+
+**NudgeMate eliminates both problems:**
+- **Zero-Friction Voice Notes:** Driving or walking? Send a 5-second voice note (*"Dentist appointment tomorrow at 4 PM"*).
+- **Fast Local Speech-to-Text:** Transcribed locally via `faster-whisper` (fast, free, private).
+- **AI Task Reasoning:** Powered by **Dahl Global** (`MiniMax M2.7` / `DeepSeek-V4-Flash`), understanding relative dates, Jalali & Gregorian calendars, and priority levels.
+- **Persistent Nagging Loop:** If you don't mark a task completed or snooze it, NudgeMate follows up every 15 minutes with interactive inline buttons!
+- **Second Brain Memory:** Tell it *"Remember the safe code is 98765"*. Later ask *"What is my safe code?"* and it instantly recalls it.
 
 ---
 
-## 🚀 نصب سریع روی اوبونتو 24 (One-Line Installer)
+### 🚀 One-Line Interactive Installer (Ubuntu 24.04)
 
-برای نصب خودکار و تعاملی NudgeMate، تنها کافیست دستور زیر را با دسترسی `sudo` در ترمینال سرور اوبونتو خود اجرا کنید:
+Run this single command with `sudo` on your server:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh | sudo bash
 ```
 
-### 📋 اطلاعاتی که در طول نصب از شما پرسیده می‌شود:
-نصاب هوشمند NudgeMate دارای **حلقه اعتبارسنجی (Validation Loop)** است و اگر ورودی را اشتباه تایپ کنید، خطا را با رنگ قرمز نمایش داده و دوباره از شما می‌خواهد آن را وارد کنید:
-1. **Telegram Bot Token:** توکن دریافتی از [@BotFather](https://t.me/BotFather) (در لحظه با API تلگرام تست و تایید می‌شود).
-2. **Admin Chat ID:** شناسه عددی تلگرام شما (از [@userinfobot](https://t.me/userinfobot) دریافت کنید).
-3. **تنظیم هوش مصنوعی Dahl (دو حالت):**
-   - **حالت خودکار (پیشنهادی):** فقط کافیست ایمیل خود را وارد کنید! نصاب به صورت اتوماتیک در [Dahl Global](https://inference.dahl.global) ثبت‌نام می‌کند، کلید اختصاصی می‌گیرد، **۱۰۰ میلیون توکن رایگان** به آن اختصاص می‌دهد و مشخصات ورود (Fingerprint) را ذخیره می‌کند.
-   - **حالت دستی:** اگر از قبل در Dahl اکانت دارید، می‌توانید کلید API خود را مستقیماً وارد کنید.
-4. **منطقه زمانی:** پیش‌فرض `Asia/Tehran` است و می‌توانید با اینتر زدن آن را تایید کنید.
+#### What makes this installer special?
+- **Zero-friction Dahl AI setup:** Enter your email, and the script automatically registers your account, claims **100 Million Free Gift Tokens**, and allocates them to your API key. (Manual key entry is also supported).
+- **Input Validation Loops:** Tests your Telegram Bot token directly with Telegram's API. If anything is mistyped, it alerts you in red and prompts again without crashing the installer!
+- **Production-Ready Systemd:** Deploys a background service that auto-restarts on reboot or failure.
 
 ---
 
-## 🛠️ دستورات مدیریت در سرور
+### 🔄 In-App One-Click Auto Updates
 
-پس از نصب، دستور میانبر `nudgemate` به سیستم شما اضافه می‌شود:
-
-```bash
-# بررسی وضعیت اجرای ربات
-nudgemate status
-
-# مشاهده زنده لاگ‌ها و درخواست‌ها
-nudgemate logs
-
-# راه‌اندازی مجدد سرویس
-nudgemate restart
-
-# متوقف کردن ربات
-nudgemate stop
-
-# بروزرسانی دستی به آخرین نسخه سورس در گیت‌هاب
-nudgemate-update
-```
-
----
-
-## 🔄 نحوه کار سیستم آپدیت خودکار
-
-1. **بروزرسانی از طریق تلگرام:**  
-   هنگامی که توسعه‌دهنده کامیت یا ریلیز جدیدی در گیت‌هاب قرار دهد، سرویس زمان‌بندی ربات آن را تشخیص داده و پیامی حاوی دکمه `[ 🚀 بروزرسانی به نسخه جدید ]` برای ادمین می‌فرستد. با کلیک بر روی آن، آخرین تغییرات دانلود شده، پکیج‌ها آپدیت و سرویس ری‌استارت می‌شود.
-2. **بروزرسانی از ترمینال سرور:**  
-   در هر زمان می‌توانید با اجرای تک‌دستور زیر سرور را آپدیت کنید:
+1. **Telegram In-App Update:** Whenever an update is pushed to GitHub, the bot alerts the admin with an inline button: `[ 🚀 Update to vX.X.X ]`. Clicking it downloads the latest code, installs requirements, and reboots the service.
+2. **Terminal Shortcut:** Update at any time by running:
    ```bash
    nudgemate-update
    ```
 
 ---
 
-## 📱 دستورات داخل ربات تلگرام
-
-| دستور | توضیحات |
-| :--- | :--- |
-| `/start` | شروع کار با ربات و ثبت‌نام کاربر |
-| `/tasks` | مشاهده لیست کارهای انجام‌نشده همراه با دکمه‌های مدیریت |
-| `/notes` | مشاهده یادداشت‌ها و حافظه ذخیره شده (Second Brain) |
-| `/briefing` | دریافت گزارش خلاصه کارهای امروز |
-| `/stats` | مشاهده آمار تسک‌های انجام‌شده و معوقه |
-| `/update` | بررسی وضعیت آپدیت و ارتقا به آخرین نسخه (مخصوص ادمین) |
-| `/help` | راهنمای کامل ارسال ویس و متن |
-
----
-
-## ⚙️ نصب دستی (Manual Installation)
-
-اگر مایلید بدون اسکریپت و به صورت دستی پروژه را اجرا کنید:
+### 🛠️ Server CLI Management
 
 ```bash
-# ۱. کلون کردن ریپازیتوری
-git clone https://github.com/roseshayan/NudgeMate.git
-cd NudgeMate
-
-# ۲. ایجاد محیط مجازی و نصب وابستگی‌ها
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# ۳. تنظیم متغیرهای محیطی
-cp .env.example .env
-nano .env
-
-# ۴. اجرای ربات
-python -m nudgemate.main
+nudgemate status    # Check systemd service status
+nudgemate logs      # View live streaming logs
+nudgemate restart   # Restart the bot
+nudgemate stop      # Stop the service
+nudgemate-update    # Pull latest GitHub release
 ```
 
 ---
 
-## 📄 لایسنس
+### 📱 Telegram Bot Commands
 
-این پروژه تحت لایسنس [MIT](LICENSE) به صورت متن‌باز منتشر شده است. استفاده و توسعه آن برای عموم آزاد است.
-سازنده: [Shayan (roseshayan)](https://github.com/roseshayan)
+| Command | Description |
+| :--- | :--- |
+| `/start` | Welcome message & register user profile |
+| `/lang` | Switch language between English and Persian (فارسی / English) |
+| `/tasks` | View pending tasks with action buttons |
+| `/notes` | View Second Brain stored memories |
+| `/briefing` | Trigger today's daily morning briefing |
+| `/stats` | View completion rate and productivity statistics |
+| `/update` | Check for updates and trigger remote self-upgrade (Admin only) |
+| `/help` | Detailed instructions on voice notes & reminders |
+
+---
+
+<br />
+
+---
+
+<a name="persian"></a>
+## 🇮🇷 فارسی
+
+### 💡 چرا NudgeMate؟
+آدم‌های پرمشغله یا حواس‌پرت همیشه با دو مشکل اساسی روبرو هستند:
+1. **اصطکاک بالا در ثبت کارها:** باز کردن یک اپلیکیشن، تایپ کردن عنوان و انتخاب تاریخ/ساعت وقت‌گیر است و فراموش می‌شود.
+2. **بی‌خاصیت بودن نوتیفیکیشن‌های معمولی:** یک آلارم ساده می‌آید، آن را می‌بندید و ۲ دقیقه بعد کار را دوباره از یاد می‌برید!
+
+**NudgeMate این دو مشکل را برای همیشه حل کرده است:**
+- **ورودی با ویس (Zero Friction):** فقط یک ویس ۵ ثانیه‌ای به ربات بفرستید: *«فردا ساعت ۴ عصر با دکتر قرار دارم»*.
+- **تبدیل صوت به متن:** با مدل محلی `faster-whisper` با سرعت بالا و پشتیبانی عالی از زبان فارسی.
+- **هوش مصنوعی Dahl Global:** استخراج دقیق موعد، اولویت و دسته‌بندی با مدل‌های پیشرفته MiniMax و DeepSeek و درک تقویم شمسی و زبان عامیانه.
+- **سیستم پیگیری سمج (Nagging):** اگر کار را انجام ندهید یا به تعویق نیندازید، ربات هر ۱۵ دقیقه یک‌بار با دکمه‌های شیشه‌ای مجدداً به شما تلنگر می‌زند!
+- **مغز دوم (Second Brain):** به ربات بگویید *«یادم باشه ماشین رو تو کوچه پنجم پارک کردم»*. هر زمان بعداً بپرسید *«ماشینم کجاست؟»*، هوش مصنوعی پاسخ شما را می‌دهد.
+
+---
+
+### 🚀 نصب آسان روی اوبونتو 24 با دستور تک‌خطی
+
+کافیست دستور زیر را با دسترسی `sudo` در ترمینال سرور خود اجرا کنید:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.sh | sudo bash
+```
+
+#### ویژگی‌های نصاب هوشمند:
+- **ساخت خودکار اکانت هوش مصنوعی با ایمیل:** نیازی به ثبت‌نام دستی در سایت نیست؛ فقط با وارد کردن یک ایمیل، اکانت شما ساخته شده و **۱۰۰ میلیون توکن رایگان هدیه** به کلید اختصاص می‌یابد! (امکان وارد کردن دستی کلید نیز وجود دارد).
+- **حلقه اعتبارسنجی (Validation Loops):** توکن ربات تلگرام در لحظه تست می‌شود و در صورت اشتباه بودن، از قطع شدن نصب جلوگیری کرده و مجدداً سوال می‌پرسد.
+- **اجرا به عنوان سرویس پایدار systemd:** پایداری همیشگی و بالا آمدن خودکار پس از ری‌استارت سرور.
+
+---
+
+### 🔄 سیستم آپدیت اتوماتیک
+
+1. **بروزرسانی مستقیم از تلگرام:** با انتشار هر نسخه جدید در گیت‌هاب، ادمین اعلان دریافت کرده و با زدن دکمه `[ 🚀 بروزرسانی به نسخه جدید ]` ربات خود را آپدیت می‌کند.
+2. **بروزرسانی از ترمینال سرور:**
+   ```bash
+   nudgemate-update
+   ```
+
+---
+
+### 🛠️ دستورات مدیریت در سرور
+
+```bash
+nudgemate status    # بررسی وضعیت سرویس
+nudgemate logs      # مشاهده زنده لاگ‌ها
+nudgemate restart   # راه‌اندازی مجدد ربات
+nudgemate-update    # دانلود و نصب آخرین نسخه گیت‌هاب
+```
+
+---
+
+## 📄 لایسنس (License)
+
+این پروژه تحت لایسنس [MIT](LICENSE) به صورت متن‌باز منتشر شده است.  
+توسعه‌دهنده: [Shayan (roseshayan)](https://github.com/roseshayan)

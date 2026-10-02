@@ -17,24 +17,32 @@ router = Router()
 
 async def handle_user_intent(message: types.Message, user_text: str, is_voice: bool = False):
     """Core logic to analyze user text or voice transcript and take appropriate database actions."""
-    await db.get_or_create_user(
+    user = await db.get_or_create_user(
         user_id=message.from_user.id,
         first_name=message.from_user.first_name,
         username=message.from_user.username,
     )
+    lang = user.language or "fa"
 
     # Let user know AI is analyzing
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
-    analysis = await ai_service.analyze_message(user_text)
+    analysis = await ai_service.analyze_message(user_text, lang=lang)
     intent = analysis.get("intent", "task")
     title = analysis.get("title", user_text[:80])
     remind_at = analysis.get("remind_at")
     category = analysis.get("category", "general")
     priority = analysis.get("priority", "medium")
-    reply_text = analysis.get("reply_text", "ثبت شد!")
+    reply_text = analysis.get("reply_text", "ثبت شد!" if lang == "fa" else "Saved!")
 
-    voice_prefix = "🎙 *متن پیاده‌شده از ویس شما:*\n_«" + user_text + "»_\n\n" if is_voice else ""
+    if is_voice:
+        voice_prefix = (
+            "🎙 *متن پیاده‌شده از ویس شما:*\n_«" + user_text + "»_\n\n"
+            if lang == "fa"
+            else "🎙 *Voice Transcript:*\n_\"" + user_text + "\"_\n\n"
+        )
+    else:
+        voice_prefix = ""
 
     if intent == "task":
         if remind_at:
@@ -45,17 +53,27 @@ async def handle_user_intent(message: types.Message, user_text: str, is_voice: b
                 category=category,
                 priority=priority,
             )
-            jalali_str = format_jalali(remind_at)
+            time_display = format_jalali(remind_at) if lang == "fa" else remind_at
             rel_str = format_relative_time(remind_at)
             
-            response = (
-                f"{voice_prefix}"
-                f"✅ **یادآوری با موفقیت تنظیم شد!**\n\n"
-                f"📌 **{title}**\n"
-                f"⏰ زمان موعد: {jalali_str} ({rel_str})\n"
-                f"🏷 دسته‌بندی: #{category} | اولویت: {priority}\n\n"
-                f"{reply_text}"
-            )
+            if lang == "fa":
+                response = (
+                    f"{voice_prefix}"
+                    f"✅ **یادآوری با موفقیت تنظیم شد!**\n\n"
+                    f"📌 **{title}**\n"
+                    f"⏰ زمان موعد: {time_display} ({rel_str})\n"
+                    f"🏷 دسته‌بندی: #{category} | اولویت: {priority}\n\n"
+                    f"{reply_text}"
+                )
+            else:
+                response = (
+                    f"{voice_prefix}"
+                    f"✅ **Reminder scheduled successfully!**\n\n"
+                    f"📌 **{title}**\n"
+                    f"⏰ Due Time: {time_display} ({rel_str})\n"
+                    f"🏷 Category: #{category} | Priority: {priority}\n\n"
+                    f"{reply_text}"
+                )
             await message.reply(response, parse_mode="Markdown")
         else:
             # Task without deadline, save as note
@@ -64,13 +82,22 @@ async def handle_user_intent(message: types.Message, user_text: str, is_voice: b
                 content=title,
                 tags=category,
             )
-            response = (
-                f"{voice_prefix}"
-                f"📝 **کار شما در لیست کارهای عمومی ثبت شد:**\n\n"
-                f"📌 **{title}**\n"
-                f"ℹ️ _زمان مشخصی ذکر نشده بود، بنابراین توی یادداشت‌هات ذخیره کردم تا هر وقت خواستی موعد براش تعیین کنی._\n\n"
-                f"{reply_text}"
-            )
+            if lang == "fa":
+                response = (
+                    f"{voice_prefix}"
+                    f"📝 **کار شما در لیست کارهای عمومی ثبت شد:**\n\n"
+                    f"📌 **{title}**\n"
+                    f"ℹ️ _زمان مشخصی ذکر نشده بود، بنابراین توی یادداشت‌هات ذخیره کردم تا هر وقت خواستی موعد براش تعیین کنی._\n\n"
+                    f"{reply_text}"
+                )
+            else:
+                response = (
+                    f"{voice_prefix}"
+                    f"📝 **Task added to your general list:**\n\n"
+                    f"📌 **{title}**\n"
+                    f"ℹ️ _No deadline specified, saved into your notes._\n\n"
+                    f"{reply_text}"
+                )
             await message.reply(response, parse_mode="Markdown")
 
     elif intent == "note":
@@ -79,19 +106,28 @@ async def handle_user_intent(message: types.Message, user_text: str, is_voice: b
             content=title,
             tags=category,
         )
-        response = (
-            f"{voice_prefix}"
-            f"🧠 **به حافظه سپرده شد! (مغز دوم)**\n\n"
-            f"🔹 {title}\n"
-            f"🏷 دسته‌بندی: #{category}\n\n"
-            f"{reply_text}"
-        )
+        if lang == "fa":
+            response = (
+                f"{voice_prefix}"
+                f"🧠 **به حافظه سپرده شد! (مغز دوم)**\n\n"
+                f"🔹 {title}\n"
+                f"🏷 دسته‌بندی: #{category}\n\n"
+                f"{reply_text}"
+            )
+        else:
+            response = (
+                f"{voice_prefix}"
+                f"🧠 **Saved to Second Brain!**\n\n"
+                f"🔹 {title}\n"
+                f"🏷 Category: #{category}\n\n"
+                f"{reply_text}"
+            )
         await message.reply(response, parse_mode="Markdown")
 
     elif intent == "query":
         tasks = await db.get_user_pending_tasks(message.from_user.id)
         notes = await db.get_user_notes(message.from_user.id, limit=20)
-        answer = await ai_service.answer_second_brain_query(user_text, tasks, notes)
+        answer = await ai_service.answer_second_brain_query(user_text, tasks, notes, lang=lang)
         response = f"{voice_prefix}💡 {answer}"
         await message.reply(response, parse_mode="Markdown")
 

@@ -26,9 +26,16 @@ class Database:
                 daily_briefing_time TEXT DEFAULT '08:30',
                 nag_interval_minutes INTEGER DEFAULT 15,
                 max_nag_count INTEGER DEFAULT 3,
-                created_at TEXT
+                created_at TEXT,
+                language TEXT DEFAULT 'fa'
             );
             """)
+
+            # Automatic migration for existing DB
+            try:
+                await db.execute("ALTER TABLE users ADD COLUMN language TEXT DEFAULT 'fa';")
+            except Exception:
+                pass
 
             # Tasks table
             await db.execute("""
@@ -70,6 +77,7 @@ class Database:
             row = await cursor.fetchone()
 
             if row:
+                lang = row["language"] if "language" in row.keys() else "fa"
                 return User(
                     user_id=row["user_id"],
                     first_name=row["first_name"],
@@ -80,13 +88,14 @@ class Database:
                     nag_interval_minutes=row["nag_interval_minutes"],
                     max_nag_count=row["max_nag_count"],
                     created_at=row["created_at"],
+                    language=lang or "fa",
                 )
 
             now_str = datetime.now(timezone.utc).isoformat()
             await db.execute(
                 """
-                INSERT INTO users (user_id, first_name, username, timezone, created_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO users (user_id, first_name, username, timezone, created_at, language)
+                VALUES (?, ?, ?, ?, ?, 'fa')
                 """,
                 (user_id, first_name, username, settings.TIMEZONE, now_str),
             )
@@ -102,7 +111,40 @@ class Database:
                 nag_interval_minutes=settings.NAG_INTERVAL_MINUTES,
                 max_nag_count=settings.MAX_NAG_COUNT,
                 created_at=now_str,
+                language="fa",
             )
+
+    async def set_user_language(self, user_id: int, language: str):
+        """Updates user's preferred language ('fa' or 'en')."""
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET language = ? WHERE user_id = ?",
+                (language, user_id),
+            )
+            await db.commit()
+
+    async def get_user(self, user_id: int) -> Optional[User]:
+        """Gets user by ID."""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+            row = await cursor.fetchone()
+            if not row:
+                return None
+            lang = row["language"] if "language" in row.keys() else "fa"
+            return User(
+                user_id=row["user_id"],
+                first_name=row["first_name"],
+                username=row["username"],
+                timezone=row["timezone"],
+                daily_briefing_enabled=bool(row["daily_briefing_enabled"]),
+                daily_briefing_time=row["daily_briefing_time"],
+                nag_interval_minutes=row["nag_interval_minutes"],
+                max_nag_count=row["max_nag_count"],
+                created_at=row["created_at"],
+                language=lang or "fa",
+            )
+
 
     async def create_task(
         self,
