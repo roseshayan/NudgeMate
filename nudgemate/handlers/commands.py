@@ -1,7 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from nudgemate import __version__, __repo__
-from nudgemate.config import settings
+from nudgemate.config import settings, update_env_variable
 from nudgemate.database.db import db
 from nudgemate.utils.keyboard import (
     get_single_task_keyboard,
@@ -12,6 +12,7 @@ from nudgemate.utils.keyboard import (
 from nudgemate.utils.time_utils import format_jalali, to_persian_digits, format_relative_time
 from nudgemate.utils.i18n import t
 from nudgemate.services.updater_service import updater_service
+from nudgemate.services.sms_service import sms_service
 
 router = Router()
 
@@ -37,6 +38,19 @@ async def cmd_help(message: types.Message):
     )
     lang = user.language or "fa"
     help_text = t("help", lang, version=__version__)
+    if message.from_user.id == settings.ADMIN_CHAT_ID:
+        admin_hint = (
+            "\n\n⚙️ **دستورات مدیریت ادمین:**\n"
+            "▫️ `/admin` : پنل تنظیمات توکن پیامک، کانال و اعتبار\n"
+            "▫️ `/update` : بررسی و اجرای آپدیت سورس"
+            if lang == "fa"
+            else
+            "\n\n⚙️ **Admin Commands:**\n"
+            "▫️ `/admin` : Settings panel & tokens\n"
+            "▫️ `/update` : Trigger source update"
+        )
+        help_text += admin_hint
+
     repo_link = f"\n\n🔗 GitHub: [NudgeMate Repository]({__repo__})"
     await message.reply(help_text + repo_link, parse_mode="Markdown", disable_web_page_preview=True)
 
@@ -156,6 +170,136 @@ async def cmd_update(message: types.Message):
         parse_mode="Markdown",
     )
     await updater_service.check_github_for_updates(message.bot)
+
+
+@router.message(Command("admin"))
+@router.message(Command("settings"))
+async def cmd_admin(message: types.Message):
+    if message.from_user.id != settings.ADMIN_CHAT_ID:
+        await message.reply("⛔️ این دستور فقط مخصوص مدیر ربات است / Admin only.")
+        return
+
+    credit = await sms_service.get_credit()
+    credit_str = f"{credit:,.0f} ریال" if credit is not None else "⚠️ توکن نامعتبر یا خطا در ارتباط"
+    token_masked = (
+        settings.MELIPAYAMAK_API_TOKEN[:6] + "..." + settings.MELIPAYAMAK_API_TOKEN[-4:]
+        if len(settings.MELIPAYAMAK_API_TOKEN) > 10
+        else (settings.MELIPAYAMAK_API_TOKEN or "تنظیم نشده")
+    )
+    chan_str = settings.REQUIRED_CHANNEL if settings.REQUIRED_CHANNEL else "غیرفعال (آزاد برای همه)"
+
+    text = (
+        f"⚙️ **پنل مدیریت و تنظیمات NudgeMate:**\n\n"
+        f"📱 **توکن ملی‌پیامک:** `{token_masked}`\n"
+        f"💰 **اعتبار زنده پنل:** `{credit_str}`\n"
+        f"📢 **کانال عضویت اجباری:** `{chan_str}`\n\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"🛠 **دستورات مدیریت تنظیمات (بدون نیاز به سرور):**\n\n"
+        f"▫️ **تنظیم توکن ملی‌پیامک:**\n"
+        f"`/set_sms_token <apitoken>`\n\n"
+        f"▫️ **تنظیم کانال عضویت اجباری:**\n"
+        f"`/set_channel @MyChannel` یا `/set_channel off`\n\n"
+        f"▫️ **استعلام زنده موجودی پیامک:**\n"
+        f"`/sms_credit`\n\n"
+        f"▫️ **بررسی و اجرای آپدیت سرور:**\n"
+        f"`/update`"
+    )
+    await message.reply(text, parse_mode="Markdown")
+
+
+@router.message(Command("set_sms_token"))
+async def cmd_set_sms_token(message: types.Message):
+    if message.from_user.id != settings.ADMIN_CHAT_ID:
+        await message.reply("⛔️ این دستور فقط مخصوص مدیر ربات است / Admin only.")
+        return
+
+    parts = message.text.strip().split()
+    if len(parts) < 2:
+        await message.reply(
+            "ℹ️ لطفاً توکن API ملی‌پیامک را همراه با دستور ارسال کنید.\n"
+            "مثال:\n`/set_sms_token 0cd932c7f08946509b95519513bbc4be`",
+            parse_mode="Markdown",
+        )
+        return
+
+    new_token = parts[1].strip()
+    settings.MELIPAYAMAK_API_TOKEN = new_token
+    update_env_variable("MELIPAYAMAK_API_TOKEN", new_token)
+
+    # Live test token
+    credit = await sms_service.get_credit()
+    if credit is not None:
+        await message.reply(
+            f"✅ **توکن ملی‌پیامک با موفقیت ذخیره و در .env ست شد!**\n\n"
+            f"💰 اعتبار فعال حساب شما: `{credit:,.0f} ریال`\n"
+            f"از این پس یادآوری‌های پیامکی با این توکن ارسال خواهند شد.",
+            parse_mode="Markdown",
+        )
+    else:
+        await message.reply(
+            f"⚠️ **توکن در فایل .env ذخیره شد، اما اتصال به ملی‌پیامک برقرار نشد.**\n\n"
+            f"لطفاً مطمئن شوید توکن کنسول ملی‌پیامک صحیح است.",
+            parse_mode="Markdown",
+        )
+
+
+@router.message(Command("set_channel"))
+async def cmd_set_channel(message: types.Message):
+    if message.from_user.id != settings.ADMIN_CHAT_ID:
+        await message.reply("⛔️ این دستور فقط مخصوص مدیر ربات است / Admin only.")
+        return
+
+    parts = message.text.strip().split()
+    if len(parts) < 2:
+        cur_chan = settings.REQUIRED_CHANNEL or "غیرفعال"
+        await message.reply(
+            f"📢 **تنظیم کانال عضویت اجباری:**\n\n"
+            f"کانال فعلی: `{cur_chan}`\n\n"
+            f"برای تغییر کانال:\n`/set_channel @MyChannel`\n\n"
+            f"برای غیرفعال کردن عضویت اجباری:\n`/set_channel off`",
+            parse_mode="Markdown",
+        )
+        return
+
+    chan_input = parts[1].strip()
+    if chan_input.lower() in ("off", "none", "disable", "حذف", "غیرفعال"):
+        settings.REQUIRED_CHANNEL = ""
+        update_env_variable("REQUIRED_CHANNEL", "")
+        await message.reply("✅ عضویت اجباری در کانال غیرفعال شد.", parse_mode="Markdown")
+        return
+
+    if not chan_input.startswith("@") and not chan_input.startswith("-100") and not chan_input.startswith("-"):
+        chan_input = f"@{chan_input}"
+
+    settings.REQUIRED_CHANNEL = chan_input
+    update_env_variable("REQUIRED_CHANNEL", chan_input)
+    await message.reply(
+        f"✅ **کانال عضویت اجباری با موفقیت به `{chan_input}` تغییر یافت و در .env ذخیره شد!**",
+        parse_mode="Markdown",
+    )
+
+
+@router.message(Command("sms_credit"))
+async def cmd_sms_credit(message: types.Message):
+    if message.from_user.id != settings.ADMIN_CHAT_ID:
+        await message.reply("⛔️ این دستور فقط مخصوص مدیر ربات است / Admin only.")
+        return
+
+    credit = await sms_service.get_credit()
+    if credit is not None:
+        await message.reply(
+            f"💰 **استعلام زنده اعتبار ملی‌پیامک:**\n\n"
+            f"اعتبار کیف پول: `{credit:,.0f} ریال`\n"
+            f"وضعیت اتصال: متصل و فعال ✅",
+            parse_mode="Markdown",
+        )
+    else:
+        await message.reply(
+            f"❌ **خطا در دریافت اعتبار ملی‌پیامک!**\n\n"
+            f"توکن API یا اینترنت سرور به سرور ملی‌پیامک را بررسی کنید.\n"
+            f"تنظیم توکن با دستور: `/set_sms_token <توکن>`",
+            parse_mode="Markdown",
+        )
 
 
 @router.message(Command("phone"))

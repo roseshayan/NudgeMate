@@ -80,3 +80,35 @@ settings = Settings()
 # Ensure directories exist
 settings.DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
 settings.TEMP_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def update_env_variable(key: str, value: str) -> bool:
+    """Updates or appends a key=value pair in .env file safely."""
+    env_file = settings.BASE_DIR / ".env"
+    if not env_file.exists():
+        try:
+            env_file.write_text(f"{key}={value}\n", encoding="utf-8")
+            return True
+        except Exception:
+            return False
+
+    try:
+        content = env_file.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        found = False
+        new_lines = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith(f"{key}=") or stripped.startswith(f"export {key}="):
+                new_lines.append(f"{key}={value}")
+                found = True
+            else:
+                new_lines.append(line)
+        if not found:
+            new_lines.append(f"{key}={value}")
+        env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+        return True
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to update .env: {e}")
+        return False

@@ -99,6 +99,10 @@ nudgemate-update    # Pull latest GitHub release
 | `/notes` | View Second Brain stored memories |
 | `/sms` | Configure MeliPayamak SMS reminder alerts |
 | `/phone` | Set mobile number for SMS notifications (`/phone 09123456789`) |
+| `/admin` | Admin panel to manage tokens, channel & balance (Admin only) |
+| `/set_sms_token` | Change MeliPayamak API token directly (`/set_sms_token <token>`) |
+| `/set_channel` | Set mandatory channel join (`/set_channel @channel` or `off`) |
+| `/sms_credit` | Live inquiry of MeliPayamak SMS wallet balance |
 | `/briefing` | Trigger today's daily morning briefing |
 | `/stats` | View completion rate and productivity statistics |
 | `/update` | Check for updates and trigger remote self-upgrade (Admin only) |
@@ -176,9 +180,12 @@ curl -sSLO https://raw.githubusercontent.com/roseshayan/NudgeMate/main/install.s
 ```bash
 nudgemate status    # بررسی وضعیت سرویس
 nudgemate logs      # مشاهده زنده لاگ‌ها
+nudgemate config    # ویرایش توکن‌ها و تنظیمات در نانو (.env)
 nudgemate restart   # راه‌اندازی مجدد ربات
 nudgemate-update    # دانلود و نصب آخرین نسخه گیت‌هاب
 ```
+
+> 💡 **نکته:** برای تغییر توکن پیامک یا کانال اجباری حتی نیازی به لاگین در سرور ندارید! کافیست در تلگرام به عنوان ادمین دستور `/admin` یا `/set_sms_token` را ارسال کنید.
 
 ---
 

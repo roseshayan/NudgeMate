@@ -368,8 +368,13 @@ case "$1" in
     update)
         bash /opt/nudgemate/update.sh
         ;;
+    config)
+        sudo nano /opt/nudgemate/.env
+        echo "Restarting NudgeMate to apply changes..."
+        sudo systemctl restart nudgemate
+        ;;
     *)
-        echo "Usage: nudgemate {start|stop|restart|status|logs|update}"
+        echo "Usage: nudgemate {start|stop|restart|status|logs|update|config}"
         exit 1
         ;;
 esac
@@ -384,6 +389,7 @@ echo -e "👉 ${BOLD}https://t.me/${BOT_USERNAME}${NC}\n"
 echo -e "${PURPLE}Useful Terminal Commands:${NC}"
 echo -e " • ${BOLD}nudgemate status${NC}   : Check service status"
 echo -e " • ${BOLD}nudgemate logs${NC}     : View live logs & events"
+echo -e " • ${BOLD}nudgemate config${NC}   : Edit settings & tokens (.env)"
 echo -e " • ${BOLD}nudgemate restart${NC}  : Restart the bot"
 echo -e " • ${BOLD}nudgemate-update${NC}   : Pull latest GitHub release\n"
 
